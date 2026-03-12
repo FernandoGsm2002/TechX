@@ -2,18 +2,19 @@ import webPush from "web-push";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-// Set VAPID keys
-if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-  webPush.setVapidDetails(
-    "mailto:soporte@techx.com",
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  );
-} else {
-  console.warn("VAPID keys are missing for web-push.");
-}
-
 export async function POST(req: Request) {
+  // Set VAPID keys on every request to ensure serverless environments read the right env vars
+  if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webPush.setVapidDetails(
+      "mailto:soporte@techx.com",
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    );
+  } else {
+    console.error("VAPID keys are missing for web-push in API route.");
+    return NextResponse.json({ error: "Server Configuration Error: Missing VAPID Keys." }, { status: 500 });
+  }
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

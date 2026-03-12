@@ -238,13 +238,18 @@ export function useUpdateTicketStatus() {
         notes,
       } as any);
 
+      return { organization_id: (ticket as { organization_id: string }).organization_id, status };
     },
-    onSuccess: (_, { id }) => {
+    onSuccess: (data, { id }) => {
       qc.invalidateQueries({ queryKey: ["tickets", id] });
       qc.invalidateQueries({ queryKey: ["tickets"] });
       qc.invalidateQueries({ queryKey: ["garantias"] });
       qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
       toast.success("Estado actualizado");
+      
+      if (data?.organization_id) {
+        notifyAdmins(data.organization_id, "Ticket Actualizado", `Ticket ID ${id.substring(0, 6)} ha cambiado a ${data.status}.`).catch(() => {});
+      }
     },
     onError: (err: Error) => toast.error(err.message),
   });

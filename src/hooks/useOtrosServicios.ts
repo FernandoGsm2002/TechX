@@ -5,6 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/contexts/OrganizationContext";
+import { notifyAdmins } from "@/lib/notifyAdmins";
 import type { Database } from "@/types/database.types";
 
 type OS = Database["public"]["Tables"]["otros_servicios"]["Row"];
@@ -117,11 +118,14 @@ export function useUpdateOtroServicioStatus() {
         }, { onConflict: "servicio_id" });
       }
     },
-    onSuccess: (_, { id }) => {
+    onSuccess: (_, { id, status }) => {
       qc.invalidateQueries({ queryKey: [KEY, id] });
       qc.invalidateQueries({ queryKey: [KEY, org?.id] });
       qc.invalidateQueries({ queryKey: ["garantias"] });
       qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
+      if (org?.id) {
+        notifyAdmins(org.id, "Servicio Actualizado", `Servicio ID ${id.substring(0, 6)} ha cambiado a ${status}.`).catch(() => {});
+      }
     },
   });
 }
