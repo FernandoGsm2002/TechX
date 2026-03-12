@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -16,7 +17,9 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider defaultOpen>
-      <AppSidebar />
+      <Suspense fallback={<div className="w-64 bg-sidebar shrink-0" />}>
+        <AppSidebar />
+      </Suspense>
       <SidebarInset className="flex flex-col min-h-svh">
         <Header />
         {/* Realtime subscriptions — invisible, activo globalmente */}
@@ -30,3 +33,4 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+

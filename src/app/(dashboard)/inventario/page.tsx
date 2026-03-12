@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -882,9 +882,9 @@ function InventorySection({ itemType }: { itemType: ItemType }) {
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// ── Main Page (inner — needs Suspense for useSearchParams) ───────────────────
 
-export default function InventarioPage() {
+function InventarioPageInner() {
   const searchParams = useSearchParams();
 
   // Determinar qué sección mostrar según el param del sidebar
@@ -899,5 +899,15 @@ export default function InventarioPage() {
       <LowStockAlert />
       <InventorySection key={tab} itemType={itemType} />
     </div>
+  );
+}
+
+// Wrapper con Suspense — requerido por Next.js cuando useSearchParams está
+// en un componente que Next intenta pre-renderizar estáticamente
+export default function InventarioPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-20 text-muted-foreground text-sm">Cargando inventario…</div>}>
+      <InventarioPageInner />
+    </Suspense>
   );
 }
