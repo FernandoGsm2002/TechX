@@ -39,18 +39,15 @@ function DashCard({
   color: string;
   href?: string;
 }) {
+  const textColor = color.split(' ').find(c => c.startsWith('text-')) || 'text-muted-foreground';
   const content = (
-    <Card className="border-border/50 transition-all hover:scale-[1.02] hover:shadow-md">
-      <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
-        <div className={`flex size-9 items-center justify-center rounded-xl ${color}`}>
-          <FaIcon icon={icon} size={16} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-3xl font-bold tracking-tight">{value}</p>
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 space-y-1 overflow-hidden transition-all hover:border-primary/50">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+        <FaIcon icon={icon} size={12} className={`shrink-0 ${textColor}`} />
+        <span className="truncate">{label}</span>
+      </div>
+      <p className="font-bold font-mono text-lg truncate">{value}</p>
+    </div>
   );
   return href ? <Link href={href}>{content}</Link> : content;
 }

@@ -56,22 +56,19 @@ function StatCard({
   color: string;
   loading: boolean;
 }) {
+  const textColor = color.split(' ').find(c => c.startsWith('text-')) || 'text-muted-foreground';
   return (
-    <Card className="border-border/50 overflow-hidden">
-      <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-medium text-muted-foreground truncate mr-2">{label}</CardTitle>
-        <div className={`flex size-8 items-center justify-center rounded-lg shrink-0 ${color}`}>
-          <Icon className="size-4" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <Skeleton className="h-7 w-24" />
-        ) : (
-          <p className="text-lg font-bold font-mono truncate">{value}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 space-y-1 overflow-hidden">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+        <Icon className={`size-3.5 shrink-0 ${textColor}`} />
+        <span className="truncate">{label}</span>
+      </div>
+      {loading ? (
+        <Skeleton className="h-6 w-20" />
+      ) : (
+        <p className="font-bold font-mono text-lg truncate">{value}</p>
+      )}
+    </div>
   );
 }
 

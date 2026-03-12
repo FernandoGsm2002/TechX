@@ -1047,20 +1047,21 @@ export default function OtrosServiciosPage() {
           { label: "Pendientes",  value: String(stats.pendientes),  icon: Clock,        color: "text-amber-400" },
           { label: "Completados", value: String(stats.completados), icon: CheckCircle2, color: "text-emerald-400" },
           { label: "Ingresos mes",value: formatCurrency(stats.ingresosMes), icon: DollarSign, color: "text-blue-400" },
-        ].map(kpi => (
-          <Card key={kpi.label} className="border-border/50 overflow-hidden">
-            <CardHeader className="pb-1 flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground truncate mr-2">{kpi.label}</CardTitle>
-              <kpi.icon className={`size-4 shrink-0 ${kpi.color}`} />
-            </CardHeader>
-            <CardContent className="pt-0">
+        ].map(kpi => {
+          const textColor = kpi.color.split(' ').find(c => c.startsWith('text-')) || 'text-muted-foreground';
+          return (
+            <div key={kpi.label} className="rounded-xl border border-border/50 bg-card/60 p-3.5 space-y-1 overflow-hidden">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <kpi.icon className={`size-3.5 shrink-0 ${textColor}`} />
+                <span className="truncate">{kpi.label}</span>
+              </div>
               {isLoading
-                ? <Skeleton className="h-6 w-16 mt-1" />
-                : <p className="text-lg font-bold font-mono truncate">{kpi.value}</p>
+                ? <Skeleton className="h-6 w-16" />
+                : <p className="font-bold font-mono text-lg truncate">{kpi.value}</p>
               }
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
       {/* Filtros */}

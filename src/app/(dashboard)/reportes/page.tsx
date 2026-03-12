@@ -59,25 +59,22 @@ function KpiCard({
   label: string; value: string; sub?: string;
   icon: IconDefinition; color: string; loading?: boolean;
 }) {
+  const textColor = color.split(' ').find(c => c.startsWith('text-')) || 'text-muted-foreground';
   return (
-    <Card className="border-border/50 transition-all hover:scale-[1.02] hover:shadow-md overflow-hidden">
-      <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-medium text-muted-foreground truncate mr-2">{label}</CardTitle>
-        <div className={`flex size-9 items-center justify-center rounded-xl shrink-0 ${color}`}>
-          <FaIcon icon={icon} size={16} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <Skeleton className="h-7 w-28 mb-1" />
-        ) : (
-          <p className="text-lg font-bold tracking-tight truncate">{value}</p>
-        )}
-        {sub && !loading && (
-          <p className="text-xs text-muted-foreground mt-1 truncate">{sub}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 space-y-1 overflow-hidden transition-all hover:border-primary/50">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+        <FaIcon icon={icon} size={12} className={`shrink-0 ${textColor}`} />
+        <span className="truncate">{label}</span>
+      </div>
+      {loading ? (
+        <Skeleton className="h-6 w-24" />
+      ) : (
+        <p className="font-bold font-mono text-lg tracking-tight truncate">{value}</p>
+      )}
+      {sub && !loading && (
+        <p className="text-[10px] text-muted-foreground truncate">{sub}</p>
+      )}
+    </div>
   );
 }
 
