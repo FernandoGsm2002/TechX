@@ -25,7 +25,10 @@ export default function DashboardLayout({
         {/* Realtime subscriptions — invisible, activo globalmente */}
         <RealtimeProvider />
         {/* Main content — padding-bottom accounts for MobileNav on small screens */}
-        <main className="flex-1 overflow-auto p-4 pb-20 md:pb-4">
+        <main
+          className="flex-1 overflow-auto p-4 md:pb-4"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)" }}
+        >
           {children}
         </main>
         <MobileNav />

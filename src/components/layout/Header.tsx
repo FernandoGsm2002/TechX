@@ -64,60 +64,69 @@ export function Header() {
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/75">
-      {/* Sidebar toggle (desktop) */}
-      <SidebarTrigger className="-ml-1 hidden md:flex" />
-      <Separator orientation="vertical" className="mr-2 h-4 hidden md:block" />
+    <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75"
+      style={{
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        minHeight: "calc(3.5rem + env(safe-area-inset-top, 0px))",
+      }}
+    >
+      {/* Inner row */}
+      <div className="flex w-full items-center gap-2 px-4 h-14">
+        {/* Sidebar toggle (desktop) */}
+        <SidebarTrigger className="-ml-1 hidden md:flex" />
+        <Separator orientation="vertical" className="mr-2 h-4 hidden md:block" />
 
-      {/* Breadcrumb */}
-      <Breadcrumb className="flex-1">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Inicio</BreadcrumbLink>
-          </BreadcrumbItem>
-          {breadcrumbs.map((crumb) => (
-            <React.Fragment key={crumb.href}>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                {crumb.isLast ? (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-            </React.Fragment>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>
+        {/* Breadcrumb */}
+        <Breadcrumb className="flex-1">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Inicio</BreadcrumbLink>
+            </BreadcrumbItem>
+            {breadcrumbs.map((crumb) => (
+              <React.Fragment key={crumb.href}>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  {crumb.isLast ? (
+                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
 
-      {/* Search */}
-      <div className="hidden sm:flex flex-1 max-w-sm mx-4">
-        <BuscadorGlobal />
-      </div>
+        {/* Search */}
+        <div className="hidden sm:flex flex-1 max-w-sm mx-4">
+          <BuscadorGlobal />
+        </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1">
-        <NotificationBell />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          aria-label="Toggle theme"
-        >
-          <FaIcon icon={faSun} size={14} className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <FaIcon icon={faMoon} size={14} className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 text-muted-foreground hover:text-destructive"
-          onClick={handleSignOut}
-          aria-label="Cerrar sesión"
-        >
-          <FaIcon icon={faRightFromBracket} size={14} />
-        </Button>
+        {/* Actions */}
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label="Toggle theme"
+          >
+            <FaIcon icon={faSun} size={14} className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <FaIcon icon={faMoon} size={14} className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-muted-foreground hover:text-destructive"
+            onClick={handleSignOut}
+            aria-label="Cerrar sesión"
+          >
+            <FaIcon icon={faRightFromBracket} size={14} />
+          </Button>
+        </div>
       </div>
     </header>
   );
 }
+
