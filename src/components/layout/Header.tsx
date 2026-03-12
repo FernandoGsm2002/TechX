@@ -1,0 +1,123 @@
+"use client";
+
+import React from "react";
+import { usePathname } from "next/navigation";
+import { faMoon, faSun, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { FaIcon } from "@/components/ui-custom/FaIcon";
+import { useTheme } from "next-themes";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { NotificationBell } from "@/components/layout/NotificationBell";
+import { BuscadorGlobal } from "@/components/layout/BuscadorGlobal";
+
+// ── Breadcrumb map ────────────────────────────────────────────────────────────
+const ROUTE_LABELS: Record<string, string> = {
+  tickets:      "Tickets",
+  clientes:     "Clientes",
+  inventario:   "Inventario",
+  finanzas:     "Finanzas",
+  gastos:       "Gastos",
+  ingresos:     "Ingresos",
+  pos:          "Punto de Venta",
+  reportes:     "Reportes",
+  configuracion:"Configuración",
+  perfil:       "Perfil",
+  superadmin:   "Superadmin",
+  orgs:         "Organizaciones",
+  scanner:      "Escáner",
+};
+
+function useBreadcrumbs() {
+  const pathname = usePathname();
+  const segments = pathname.split("/").filter(Boolean);
+  return segments.map((seg, i) => ({
+    label: ROUTE_LABELS[seg] ?? (seg.length === 36 ? "Detalle" : seg),
+    href: "/" + segments.slice(0, i + 1).join("/"),
+    isLast: i === segments.length - 1,
+  }));
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+export function Header() {
+  const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const breadcrumbs = useBreadcrumbs();
+  const supabase = createClient();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast.success("Sesión cerrada");
+    router.push("/login");
+  };
+
+  return (
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+      {/* Sidebar toggle (desktop) */}
+      <SidebarTrigger className="-ml-1 hidden md:flex" />
+      <Separator orientation="vertical" className="mr-2 h-4 hidden md:block" />
+
+      {/* Breadcrumb */}
+      <Breadcrumb className="flex-1">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Inicio</BreadcrumbLink>
+          </BreadcrumbItem>
+          {breadcrumbs.map((crumb) => (
+            <React.Fragment key={crumb.href}>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                {crumb.isLast ? (
+                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+            </React.Fragment>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Search */}
+      <div className="hidden sm:flex flex-1 max-w-sm mx-4">
+        <BuscadorGlobal />
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-1">
+        <NotificationBell />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          aria-label="Toggle theme"
+        >
+          <FaIcon icon={faSun} size={14} className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <FaIcon icon={faMoon} size={14} className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 text-muted-foreground hover:text-destructive"
+          onClick={handleSignOut}
+          aria-label="Cerrar sesión"
+        >
+          <FaIcon icon={faRightFromBracket} size={14} />
+        </Button>
+      </div>
+    </header>
+  );
+}
