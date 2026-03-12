@@ -11,12 +11,12 @@ import { useOrganization } from "@/contexts/OrganizationContext";
 import { useRealtimeTickets, useRealtimeOtrosServicios, useRealtimeInventory } from "@/hooks/useRealtime";
 
 export function RealtimeProvider() {
-  const { org } = useOrganization();
+  const { org, userId } = useOrganization();
   const orgId = org?.id;
 
   // Suscripciones en tiempo real — sin render visual propio
-  useRealtimeTickets(orgId);
-  useRealtimeOtrosServicios(orgId);
+  useRealtimeTickets(orgId, userId);
+  useRealtimeOtrosServicios(orgId, userId);
   useRealtimeInventory(orgId);
 
   return null; // Invisible — solo efectos

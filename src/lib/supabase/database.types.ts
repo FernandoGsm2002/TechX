@@ -7,6 +7,8 @@
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
@@ -196,6 +198,64 @@ export type Database = {
           },
         ]
       }
+      guarantee_payments: {
+        Row: {
+          amount: number
+          concept: string
+          created_at: string
+          guarantee_id: string
+          id: string
+          notes: string | null
+          organization_id: string
+          payment_method: string
+          registered_by: string | null
+        }
+        Insert: {
+          amount: number
+          concept: string
+          created_at?: string
+          guarantee_id: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          payment_method?: string
+          registered_by?: string | null
+        }
+        Update: {
+          amount?: number
+          concept?: string
+          created_at?: string
+          guarantee_id?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          payment_method?: string
+          registered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarantee_payments_guarantee_id_fkey"
+            columns: ["guarantee_id"]
+            isOneToOne: false
+            referencedRelation: "guarantees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarantee_payments_guarantee_id_fkey"
+            columns: ["guarantee_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_guarantees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarantee_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guarantees: {
         Row: {
           claim_count: number
@@ -290,7 +350,9 @@ export type Database = {
           cost_price: number | null
           created_at: string
           id: string
+          image_url: string | null
           item_type: Database["public"]["Enums"]["inventory_item_type"]
+          min_stock: number
           model: string | null
           name: string
           notes: string | null
@@ -307,7 +369,9 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           id?: string
+          image_url?: string | null
           item_type?: Database["public"]["Enums"]["inventory_item_type"]
+          min_stock?: number
           model?: string | null
           name: string
           notes?: string | null
@@ -324,7 +388,9 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           id?: string
+          image_url?: string | null
           item_type?: Database["public"]["Enums"]["inventory_item_type"]
+          min_stock?: number
           model?: string | null
           name?: string
           notes?: string | null
@@ -337,6 +403,66 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "inventory_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_id: string
+          movement_type: string
+          notes: string | null
+          organization_id: string
+          performed_by: string | null
+          quantity_after: number
+          quantity_before: number
+          quantity_delta: number
+          reference_id: string | null
+          reference_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_id: string
+          movement_type: string
+          notes?: string | null
+          organization_id: string
+          performed_by?: string | null
+          quantity_after: number
+          quantity_before: number
+          quantity_delta: number
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_id?: string
+          movement_type?: string
+          notes?: string | null
+          organization_id?: string
+          performed_by?: string | null
+          quantity_after?: number
+          quantity_before?: number
+          quantity_delta?: number
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_movements_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -453,6 +579,7 @@ export type Database = {
           order_number: string | null
           organization_id: string
           paid: boolean
+          paid_at: string | null
           payment_method: string | null
           payment_status: string | null
           pin_code: string | null
@@ -484,6 +611,7 @@ export type Database = {
           order_number?: string | null
           organization_id: string
           paid?: boolean
+          paid_at?: string | null
           payment_method?: string | null
           payment_status?: string | null
           pin_code?: string | null
@@ -515,6 +643,7 @@ export type Database = {
           order_number?: string | null
           organization_id?: string
           paid?: boolean
+          paid_at?: string | null
           payment_method?: string | null
           payment_status?: string | null
           pin_code?: string | null
@@ -603,6 +732,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string | null
+          endpoint: string
+          id: string
+          organization_id: string | null
+          p256dh: string
+          user_id: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          organization_id?: string | null
+          p256dh: string
+          user_id?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          organization_id?: string | null
+          p256dh?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -712,6 +879,54 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicio_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          servicio_id: string
+          status_from: string | null
+          status_to: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          servicio_id: string
+          status_from?: string | null
+          status_to: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          servicio_id?: string
+          status_from?: string | null
+          status_to?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicio_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicio_history_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "otros_servicios"
             referencedColumns: ["id"]
           },
         ]
@@ -1126,23 +1341,43 @@ export type Database = {
     }
     Functions: {
       approve_organization: { Args: { org_id: string }; Returns: undefined }
+      bulk_adjust_stock: {
+        Args: { p_adjustments: Json; p_organization_id: string }
+        Returns: Json
+      }
       decrement_stock: {
-        Args: { p_inventory_id: string; p_qty: number }
+        Args: {
+          p_inventory_id: string
+          p_notes?: string
+          p_performed_by?: string
+          p_qty: number
+          p_reference_id?: string
+          p_reference_type?: string
+        }
         Returns: undefined
       }
-      get_my_org_id: { Args: Record<PropertyKey, never>; Returns: string }
+      get_my_org_id: { Args: never; Returns: string }
       get_my_role: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
       is_org_active: { Args: { org_id: string }; Returns: boolean }
       reject_organization: { Args: { org_id: string }; Returns: undefined }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       device_type: "movil" | "laptop" | "consola" | "tablet" | "otro"
       image_type: "entrada" | "salida" | "proceso"
       inventory_item_type: "producto" | "repuesto_propio" | "repuesto_comprado"
-      plan_type: "3_meses" | "6_meses" | "1_anio"
+      plan_type:
+        | "3_meses"
+        | "6_meses"
+        | "1_anio"
+        | "free"
+        | "basic"
+        | "pro"
+        | "enterprise"
       stock_condition: "nuevo" | "usado" | "desguace"
       ticket_status:
         | "recibido"
@@ -1150,6 +1385,15 @@ export type Database = {
         | "fallido"
         | "completado"
         | "entregado"
+      ticket_status_old:
+        | "recibido"
+        | "en_proceso"
+        | "listo"
+        | "entregado"
+        | "garantia"
+        | "cancelado"
+        | "fallido"
+        | "completado"
       user_role: "superadmin" | "admin" | "tecnico"
     }
     CompositeTypes: {
@@ -1183,13 +1427,13 @@ export type Tables<
     : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
         DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-      DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
@@ -1209,12 +1453,12 @@ export type TablesInsert<
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
@@ -1234,12 +1478,12 @@ export type TablesUpdate<
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
@@ -1255,8 +1499,8 @@ export type Enums<
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
@@ -1272,8 +1516,8 @@ export type CompositeTypes<
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
   public: {
@@ -1281,7 +1525,15 @@ export const Constants = {
       device_type: ["movil", "laptop", "consola", "tablet", "otro"],
       image_type: ["entrada", "salida", "proceso"],
       inventory_item_type: ["producto", "repuesto_propio", "repuesto_comprado"],
-      plan_type: ["3_meses", "6_meses", "1_anio"],
+      plan_type: [
+        "3_meses",
+        "6_meses",
+        "1_anio",
+        "free",
+        "basic",
+        "pro",
+        "enterprise",
+      ],
       stock_condition: ["nuevo", "usado", "desguace"],
       ticket_status: [
         "recibido",
@@ -1290,13 +1542,18 @@ export const Constants = {
         "completado",
         "entregado",
       ],
+      ticket_status_old: [
+        "recibido",
+        "en_proceso",
+        "listo",
+        "entregado",
+        "garantia",
+        "cancelado",
+        "fallido",
+        "completado",
+      ],
       user_role: ["superadmin", "admin", "tecnico"],
     },
   },
 } as const
-
-// Convenience type aliases
-export type Organization = Database['public']['Tables']['organizations']['Row']
-export type UserRole = Database['public']['Enums']['user_role']
-export type TicketStatus = Database['public']['Enums']['ticket_status']
 

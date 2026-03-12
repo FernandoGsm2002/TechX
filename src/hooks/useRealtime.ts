@@ -2,13 +2,14 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 
+import { toast } from "sonner";
+
 /**
  * useRealtimeTickets
  * Suscribe a cambios en la tabla `tickets` vía Supabase Realtime.
- * Cuando un técnico cambia el estado de un ticket, el dashboard/lista
- * se actualiza automáticamente sin necesidad de refrescar.
+ * Muestra notificaciones locales cuando otros usuarios realizan acciones.
  */
-export function useRealtimeTickets(orgId: string | undefined) {
+export function useRealtimeTickets(orgId: string | undefined, userId: string | null = null) {
   const qc = useQueryClient();
 
   useEffect(() => {
@@ -27,14 +28,25 @@ export function useRealtimeTickets(orgId: string | undefined) {
           filter: `organization_id=eq.${orgId}`,
         },
         (payload) => {
-          // Invalidar queries relevantes cuando haya cualquier cambio
           qc.invalidateQueries({ queryKey: ["tickets"] });
-          // Si es actualización de un ticket específico, invalidar ese también
           if (payload.eventType === "UPDATE" && payload.new?.id) {
             qc.invalidateQueries({ queryKey: ["tickets", payload.new.id] });
           }
-          // Actualizar stats del dashboard
           qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
+
+          // Show foreground notification if made by another user
+          const newRow = payload.new as any;
+          if (newRow && (!newRow.created_by || newRow.created_by !== userId)) {
+            if (payload.eventType === "INSERT") {
+              toast.info(`Nuevo ticket recibido`, { description: `Estado: ${newRow.status}` });
+            } else if (payload.eventType === "UPDATE") {
+              // Ensure we don't spam toasts on every update unless status or amount changed
+              const oldRow = payload.old as any;
+              if (oldRow && oldRow.status !== newRow.status) {
+                toast.info(`Ticket actualizado`, { description: `Nuevo estado: ${newRow.status}` });
+              }
+            }
+          }
         }
       )
       .subscribe();
@@ -42,14 +54,14 @@ export function useRealtimeTickets(orgId: string | undefined) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [orgId, qc]);
+  }, [orgId, userId, qc]);
 }
 
 /**
  * useRealtimeOtrosServicios
  * Igual que useRealtimeTickets pero para otros_servicios.
  */
-export function useRealtimeOtrosServicios(orgId: string | undefined) {
+export function useRealtimeOtrosServicios(orgId: string | undefined, userId: string | null = null) {
   const qc = useQueryClient();
 
   useEffect(() => {
@@ -73,6 +85,18 @@ export function useRealtimeOtrosServicios(orgId: string | undefined) {
             qc.invalidateQueries({ queryKey: ["otros_servicios", payload.new.id] });
           }
           qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
+
+          const newRow = payload.new as any;
+          if (newRow && (!newRow.created_by || newRow.created_by !== userId)) {
+            if (payload.eventType === "INSERT") {
+              toast.info(`Nuevo servicio asignado`, { description: `ID: ${newRow.id.slice(0, 6)}` });
+            } else if (payload.eventType === "UPDATE") {
+              const oldRow = payload.old as any;
+              if (oldRow && oldRow.status !== newRow.status) {
+                toast.info(`Servicio actualizado`, { description: `Nuevo estado: ${newRow.status}` });
+              }
+            }
+          }
         }
       )
       .subscribe();
@@ -80,7 +104,7 @@ export function useRealtimeOtrosServicios(orgId: string | undefined) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [orgId, qc]);
+  }, [orgId, userId, qc]);
 }
 
 /**

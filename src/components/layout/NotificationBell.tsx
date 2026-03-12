@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useLowStockNotifications, useInventoryMovements } from "@/hooks/useInventoryMovements";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 // ── Movement icon ─────────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ export function NotificationBell() {
 
   const { data: lowStock = []   } = useLowStockNotifications();
   const { data: movements = []  } = useInventoryMovements(undefined, 10);
+  const { isSupported, isSubscribed, subscribeToPush } = usePushNotifications();
 
   const badgeCount = lowStock.length;
 
@@ -114,6 +116,15 @@ export function NotificationBell() {
             </button>
           ))}
         </div>
+
+        {isSupported && !isSubscribed && (
+          <div className="bg-primary/10 px-4 py-2 border-b border-primary/20 flex items-center justify-between">
+            <span className="text-[10px] text-primary font-medium">Activa alertas en 2do plano</span>
+            <Button size="sm" variant="default" className="h-6 text-[10px] px-2" onClick={subscribeToPush}>
+              Activar
+            </Button>
+          </div>
+        )}
 
         {/* Content */}
         <div className="max-h-72 overflow-y-auto">

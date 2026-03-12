@@ -60,18 +60,21 @@ export function useGastos(opts: UseGastosOptions = {}) {
   });
 }
 
+import { notifyAdmins } from "@/lib/notifyAdmins";
+
 export function useCreateGasto() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: ExpenseInsert) => {
       const { data, error } = await supabase.from("expenses").insert(values).select().single();
       if (error) throw error;
-      return data;
+      return data as any as ExpenseRow;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["gastos"] });
       qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
       toast.success("Gasto registrado");
+      notifyAdmins(data.organization_id, "Nuevo Gasto", `Se registró un gasto por ${data.amount}`).catch(() => {});
     },
     onError: (err: Error) => toast.error(err.message),
   });

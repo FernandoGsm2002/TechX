@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { notifyAdmins } from "@/lib/notifyAdmins";
 import type { TicketStatus } from "@/types/domain";
 
 const supabase = createClient();
@@ -153,9 +154,10 @@ export function useCreateTicket() {
       if (error) throw error;
       return data as TicketRow;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["tickets"] });
       toast.success("Ticket creado");
+      notifyAdmins(data.organization_id, "Nuevo Ticket", `Se ha creado un nuevo ticket de reparación.`).catch(() => {});
     },
     onError: (err: Error) => toast.error(err.message),
   });
