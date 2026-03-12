@@ -124,3 +124,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ── Mobile-first utilities ──────────────────────────────────────────────────── */
+
+/* Hide scrollbar on mobile nav but keep scroll */
+.no-scrollbar {
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE / Edge */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;                  /* Chrome, Safari, Edge Chromium */
+}
+
+/* Safe-area for Dialogs / Sheets on iPhone */
+@layer utilities {
+  /* Dialog content — respect safe area + never overflow screen */
+  [data-slot="dialog-content"],
+  [role="dialog"] > div:first-child {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2rem);
+    overflow-y: auto;
+  }
+
+  /* Sheet — respect bottom safe-area */
+  [data-slot="sheet-content"] {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+}
+
+/* Prevent double-tap zoom on interactive elements (iOS) */
+@media (hover: none) and (pointer: coarse) {
+  a, button, [role="button"] {
+    touch-action: manipulation;
+  }
+}

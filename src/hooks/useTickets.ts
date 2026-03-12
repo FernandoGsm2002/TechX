@@ -258,15 +258,32 @@ export async function uploadIntakePhoto(
   const ext = file.name.split(".").pop() ?? "jpg";
   const path = `${orgId}/${ticketId}/${Date.now()}.${ext}`;
 
-  const { error } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("ticket-intake-photos")
     .upload(path, file, { upsert: false });
 
-  if (error) throw error;
+  if (uploadError) throw uploadError;
 
   const { data } = supabase.storage
     .from("ticket-intake-photos")
     .getPublicUrl(path);
 
-  return data.publicUrl;
+  const publicUrl = data.publicUrl;
+
+  // Registrar en ticket_images para que aparezca en el ticket detail
+  const { error: insertError } = await supabase
+    .from("ticket_images")
+    .insert({
+      ticket_id: ticketId,
+      image_url: publicUrl,
+      image_type: "entrada" as const,   // matches DB enum: entrada | salida | proceso
+      organization_id: orgId,
+    });
+
+  if (insertError) {
+    console.error("Error registrando imagen:", insertError);
+    // No lanzar error — la foto ya está subida al storage
+  }
+
+  return publicUrl;
 }

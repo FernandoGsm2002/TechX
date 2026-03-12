@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -19,6 +20,10 @@ export interface DataColumn<T> {
   header: string;
   cell: (row: T) => React.ReactNode;
   className?: string;
+  /** Si true, se muestra en la card de mobile (máx 4-5 recomendados). Por defecto: true */
+  showOnMobile?: boolean;
+  /** Si true, esta columna es la principal (título de la card). Máx 1. */
+  primary?: boolean;
 }
 
 interface DataTableProps<T extends object> {
@@ -66,6 +71,11 @@ export function DataTable<T extends object>({
   const totalPages = Math.ceil(filtered.length / pageSize);
   const paged      = filtered.slice((page - 1) * pageSize, page * pageSize);
 
+  // Columns for mobile cards — show all unless explicitly marked showOnMobile: false
+  const mobileColumns = columns.filter((c) => c.showOnMobile !== false);
+  const primaryCol     = mobileColumns.find((c) => c.primary) ?? mobileColumns[0];
+  const secondaryMobileCols = mobileColumns.filter((c) => c !== primaryCol);
+
   return (
     <div className="space-y-3">
       {/* Search */}
@@ -81,8 +91,74 @@ export function DataTable<T extends object>({
         </div>
       )}
 
-      {/* Table — scroll horizontal en mobile para tablas anchas */}
-      <div className="rounded-xl border border-border/50 overflow-hidden">
+      {/* ══════════════════════════════════════════════════════════════════════
+       *  MOBILE: Card layout (< md)
+       * ══════════════════════════════════════════════════════════════════════ */}
+      <div className="md:hidden space-y-2">
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="border-border/50 bg-card/60">
+                <CardContent className="pt-3 pb-3 space-y-2">
+                  <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
+                  <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+                  <div className="h-3 w-1/3 rounded bg-muted animate-pulse" />
+                </CardContent>
+              </Card>
+            ))
+          : paged.length === 0
+          ? (
+            <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
+              {emptyIcon}
+              <p className="text-sm">{emptyMessage}</p>
+            </div>
+          )
+          : paged.map((row, i) => (
+              <Card
+                key={i}
+                className={cn(
+                  "border-border/50 bg-card/60 backdrop-blur transition-all hover:border-border/80",
+                  onRowClick && "cursor-pointer active:scale-[0.99]"
+                )}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
+                <CardContent className="pt-3 pb-2.5 space-y-2">
+                  {/* Primary column — título de la card */}
+                  {primaryCol && (
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        {primaryCol.cell(row)}
+                      </div>
+                      {actions && (
+                        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                          {actions(row)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Secondary columns — como filas de info */}
+                  {secondaryMobileCols.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                      {secondaryMobileCols.map((col) => (
+                        <div key={col.key} className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wide font-medium">
+                            {col.header}:
+                          </span>
+                          <span className="text-foreground/80">{col.cell(row)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+        }
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+       *  DESKTOP: Table layout (≥ md)
+       * ══════════════════════════════════════════════════════════════════════ */}
+      <div className="hidden md:block rounded-xl border border-border/50 overflow-hidden">
         <div className="overflow-x-auto">
           <Table className="min-w-full">
             <TableHeader>

@@ -182,7 +182,7 @@ export default function TicketDetailPage() {
     notes: string | null; created_at: string;
     profiles?: { full_name: string | null } | null;
   }[]) ?? [];
-  const intakeImages = (t.ticket_images as { id: string; url: string }[]) ?? [];
+  const intakeImages = (t.ticket_images as { id: string; image_url: string; image_type: string }[]) ?? [];
 
   // New intake fields
   const powerOn     = t.power_on as boolean | null;
@@ -504,7 +504,7 @@ export default function TicketDetailPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={img.id}
-                    src={img.url}
+                    src={img.image_url}
                     alt="Ingreso del dispositivo"
                     className="rounded-lg border border-border object-cover w-full aspect-video"
                   />
@@ -655,6 +655,42 @@ export default function TicketDetailPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* ── Fotos de Ingreso ── */}
+        {(() => {
+          const images = (ticket as any).ticket_images as { id: string; image_url: string; image_type: string }[] | undefined;
+          if (!images || images.length === 0) return null;
+          return (
+            <Card className="border-border/50 md:col-span-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Camera className="size-4 text-muted-foreground" /> Fotos de Ingreso
+                  <Badge variant="secondary" className="text-[10px] h-4">{images.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {images.map((img) => (
+                    <a
+                      key={img.id}
+                      href={img.image_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative aspect-square rounded-lg overflow-hidden border border-border/50 bg-muted/30 hover:border-primary/50 transition-colors group"
+                    >
+                      <img
+                        src={img.image_url}
+                        alt="Foto de ingreso"
+                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+                        loading="lazy"
+                      />
+                    </a>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* ── Historial ── */}
         <Card className="border-border/50 md:col-span-2">

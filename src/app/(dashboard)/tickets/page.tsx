@@ -209,10 +209,12 @@ export default function TicketsPage() {
         </span>
       ),
       className: "w-24",
+      showOnMobile: false,
     },
     {
       key: "customer",
       header: "Cliente",
+      primary: true,
       cell: (row) => {
         const name    = row.customers?.full_name ?? row.guest_name;
         const isGuest = !row.customers?.full_name && !!row.guest_name;
@@ -301,6 +303,7 @@ export default function TicketsPage() {
         </span>
       ),
       className: "hidden md:table-cell",
+      showOnMobile: false,
     },
     ...(isAdmin ? [{
       key: "technician",
@@ -312,6 +315,7 @@ export default function TicketsPage() {
           : <span className="text-xs text-muted-foreground">—</span>;
       },
       className: "hidden md:table-cell",
+      showOnMobile: false,
     } as DataColumn<TicketWithRelations>] : []),
   ];
 

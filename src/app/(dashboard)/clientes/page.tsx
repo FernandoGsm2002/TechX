@@ -150,6 +150,7 @@ export default function ClientesPage() {
     {
       key: "full_name",
       header: "Cliente",
+      primary: true,
       cell: (row) => (
         <div>
           <p className="font-medium text-sm">{row.full_name}</p>
@@ -186,6 +187,7 @@ export default function ClientesPage() {
     {
       key: "tax_id",
       header: taxIdName,
+      showOnMobile: false,
       cell: (row) => (
         <span className="text-sm font-mono">
           {row.tax_id ?? <span className="text-muted-foreground">—</span>}
