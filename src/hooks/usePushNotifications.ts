@@ -48,15 +48,24 @@ export function usePushNotifications() {
     try {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        toast.error("Permiso para notificaciones denegado.");
+        toast.error("Permiso denegado por el usuario o el sistema.");
         return;
       }
 
-      const registration = await navigator.serviceWorker.ready;
-      
       const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!publicVapidKey) {
-        console.warn("Falta NEXT_PUBLIC_VAPID_PUBLIC_KEY");
+        toast.error("Falta llave VAPID pública (Configuración de entorno).");
+        return;
+      }
+
+      let registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        toast.error("Esperando al Service Worker...");
+        registration = await navigator.serviceWorker.ready;
+      }
+
+      if (!registration) {
+        toast.error("No se pudo iniciar el Service Worker.");
         return;
       }
 
@@ -74,13 +83,13 @@ export function usePushNotifications() {
 
       if (res.ok) {
         setIsSubscribed(true);
-        toast.success("Notificaciones activadas exitosamente");
+        toast.success("Push activado correctamente en este dispositivo.");
       } else {
-        throw new Error("Error al guardar la suscripción");
+        throw new Error("El servidor rechazó la suscripción (Código " + res.status + ")");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to subscribe to push notifications:", error);
-      toast.error("Hubo un error al activar las notificaciones");
+      toast.error(`Fallo al activar Push: ${error.message || 'Error desconocido'}`);
     }
   };
 

@@ -43,9 +43,9 @@ export function Providers({ children }: { children: ReactNode }) {
           {children}
           <Toaster
             richColors
-            position="top-right"
-            closeButton
-            duration={4000}
+            position="bottom-center"
+            closeButton={false}
+            duration={3000}
           />
         </OrganizationProvider>
         {process.env.NODE_ENV === "development" && (
