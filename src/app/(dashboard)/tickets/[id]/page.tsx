@@ -490,30 +490,6 @@ export default function TicketDetailPage() {
           </CardContent>
         </Card>
 
-        {/* ── Foto de ingreso ── */}
-        {intakeImages.length > 0 && (
-          <Card className="border-border/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Camera className="size-4 text-muted-foreground" /> Foto de ingreso
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-2">
-                {intakeImages.map((img) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={img.id}
-                    src={img.image_url}
-                    alt="Ingreso del dispositivo"
-                    className="rounded-lg border border-border object-cover w-full aspect-video"
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* ── Detalle del Servicio + Total ── */}
         <Card className="border-border/50 md:col-span-2">
           <CardHeader className="pb-3">

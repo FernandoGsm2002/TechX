@@ -57,18 +57,18 @@ function StatCard({
   loading: boolean;
 }) {
   return (
-    <Card className="border-border/50">
+    <Card className="border-border/50 overflow-hidden">
       <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
-        <div className={`flex size-8 items-center justify-center rounded-lg ${color}`}>
+        <CardTitle className="text-xs font-medium text-muted-foreground truncate mr-2">{label}</CardTitle>
+        <div className={`flex size-8 items-center justify-center rounded-lg shrink-0 ${color}`}>
           <Icon className="size-4" />
         </div>
       </CardHeader>
       <CardContent>
         {loading ? (
-          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-7 w-24" />
         ) : (
-          <p className="text-2xl font-bold font-mono">{value}</p>
+          <p className="text-lg font-bold font-mono truncate">{value}</p>
         )}
       </CardContent>
     </Card>

@@ -60,21 +60,21 @@ function KpiCard({
   icon: IconDefinition; color: string; loading?: boolean;
 }) {
   return (
-    <Card className="border-border/50 transition-all hover:scale-[1.02] hover:shadow-md">
+    <Card className="border-border/50 transition-all hover:scale-[1.02] hover:shadow-md overflow-hidden">
       <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
-        <div className={`flex size-9 items-center justify-center rounded-xl ${color}`}>
+        <CardTitle className="text-xs font-medium text-muted-foreground truncate mr-2">{label}</CardTitle>
+        <div className={`flex size-9 items-center justify-center rounded-xl shrink-0 ${color}`}>
           <FaIcon icon={icon} size={16} />
         </div>
       </CardHeader>
       <CardContent>
         {loading ? (
-          <Skeleton className="h-9 w-36 mb-1" />
+          <Skeleton className="h-7 w-28 mb-1" />
         ) : (
-          <p className="text-3xl font-bold tracking-tight">{value}</p>
+          <p className="text-lg font-bold tracking-tight truncate">{value}</p>
         )}
         {sub && !loading && (
-          <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+          <p className="text-xs text-muted-foreground mt-1 truncate">{sub}</p>
         )}
       </CardContent>
     </Card>

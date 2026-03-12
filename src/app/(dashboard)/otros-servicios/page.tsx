@@ -1048,15 +1048,15 @@ export default function OtrosServiciosPage() {
           { label: "Completados", value: String(stats.completados), icon: CheckCircle2, color: "text-emerald-400" },
           { label: "Ingresos mes",value: formatCurrency(stats.ingresosMes), icon: DollarSign, color: "text-blue-400" },
         ].map(kpi => (
-          <Card key={kpi.label} className="border-border/50">
+          <Card key={kpi.label} className="border-border/50 overflow-hidden">
             <CardHeader className="pb-1 flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-xs font-medium text-muted-foreground">{kpi.label}</CardTitle>
-              <kpi.icon className={`size-4 ${kpi.color}`} />
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate mr-2">{kpi.label}</CardTitle>
+              <kpi.icon className={`size-4 shrink-0 ${kpi.color}`} />
             </CardHeader>
             <CardContent className="pt-0">
               {isLoading
                 ? <Skeleton className="h-6 w-16 mt-1" />
-                : <p className="text-xl font-bold font-mono">{kpi.value}</p>
+                : <p className="text-lg font-bold font-mono truncate">{kpi.value}</p>
               }
             </CardContent>
           </Card>

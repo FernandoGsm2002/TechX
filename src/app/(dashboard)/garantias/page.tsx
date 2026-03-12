@@ -100,16 +100,16 @@ function StatCard({ label, value, icon: Icon, colorClass, loading }: {
   colorClass: string; loading: boolean;
 }) {
   return (
-    <Card className="border-border/50 bg-card/60 backdrop-blur">
+    <Card className="border-border/50 bg-card/60 backdrop-blur overflow-hidden">
       <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
-        <div className={`flex size-8 items-center justify-center rounded-lg ${colorClass}`}>
+        <CardTitle className="text-xs font-medium text-muted-foreground truncate mr-2">{label}</CardTitle>
+        <div className={`flex size-8 items-center justify-center rounded-lg shrink-0 ${colorClass}`}>
           <Icon className="size-4" />
         </div>
       </CardHeader>
       <CardContent>
-        {loading ? <Skeleton className="h-8 w-16" /> : (
-          <p className="text-2xl font-bold">{value}</p>
+        {loading ? <Skeleton className="h-7 w-16" /> : (
+          <p className="text-lg font-bold truncate">{value}</p>
         )}
       </CardContent>
     </Card>
