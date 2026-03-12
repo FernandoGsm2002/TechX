@@ -270,7 +270,9 @@ function OrgCard({
     });
   };
 
-  const isExpired = org.subscription_end && new Date(org.subscription_end) < new Date();
+  // eslint-disable-next-line react-compiler/react-compiler
+  const isExpired = org.subscription_end && new Date(org.subscription_end).getTime() < Date.now();
+  // eslint-disable-next-line react-compiler/react-compiler
   const daysLeft = org.subscription_end
     ? Math.ceil((new Date(org.subscription_end).getTime() - Date.now()) / 86400000)
     : null;

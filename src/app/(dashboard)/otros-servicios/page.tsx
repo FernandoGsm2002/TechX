@@ -620,7 +620,7 @@ function StatusChangeDialog({ servicio, targetStatus, open, onClose }: StatusCha
         setWarrantyMonths(String(months));
       }
     }
-  }, [open]);
+  }, [open, servicio, defaultMonths]);
 
   const confirm = async () => {
     const warrantyDaysToSave = isEntregando

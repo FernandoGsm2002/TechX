@@ -158,7 +158,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     });
 
     return () => listener.subscription.unsubscribe();
-  }, [fetchData]);
+  }, [fetchData, supabase.auth]);
 
   // ── Derived helpers (always reflect current orgState) ─────────────────────
   const formatCurrency = useCallback((amount: number) => {

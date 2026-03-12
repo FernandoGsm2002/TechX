@@ -58,7 +58,7 @@ function StatCard({
 }) {
   const textColor = color.split(' ').find(c => c.startsWith('text-')) || 'text-muted-foreground';
   return (
-    <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 space-y-1 overflow-hidden">
+    <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 space-y-1 overflow-hidden transition-all hover:border-primary/50 min-w-[130px]">
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
         <Icon className={`size-3.5 shrink-0 ${textColor}`} />
         <span className="truncate">{label}</span>
@@ -66,7 +66,7 @@ function StatCard({
       {loading ? (
         <Skeleton className="h-6 w-20" />
       ) : (
-        <p className="font-bold font-mono text-lg truncate">{value}</p>
+        <p className="font-bold font-mono text-lg tracking-tight truncate" title={value}>{value}</p>
       )}
     </div>
   );
@@ -218,7 +218,7 @@ function GastosTab() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar gasto?</AlertDialogTitle>
-            <AlertDialogDescription>Se eliminará "<strong>{deleteTarget?.description}</strong>".</AlertDialogDescription>
+            <AlertDialogDescription>Se eliminará &quot;<strong>{deleteTarget?.description}</strong>&quot;.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>

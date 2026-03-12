@@ -122,7 +122,7 @@ export function BuscadorGlobal() {
           {results.length === 0 && !isLoading ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
               <Search className="size-7 opacity-30" />
-              <p className="text-xs">Sin resultados para <strong>"{query}"</strong></p>
+              <p className="text-xs">Sin resultados para <strong>&quot;{query}&quot;</strong></p>
             </div>
           ) : (
             <ul className="max-h-96 overflow-y-auto divide-y divide-border/50 py-1">

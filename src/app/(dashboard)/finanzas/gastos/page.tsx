@@ -80,23 +80,22 @@ function StatCard({ label, value, sub, icon, colorClass, loading }: {
   label: string; value: string; sub?: string;
   icon: IconDefinition; colorClass: string; loading: boolean;
 }) {
+  const textColor = colorClass.split(' ').find(c => c.startsWith('text-')) || 'text-muted-foreground';
   return (
-    <Card className="border-border/50 bg-card/60 backdrop-blur">
-      <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
-        <div className={`flex size-8 items-center justify-center rounded-lg ${colorClass}`}>
-          <FaIcon icon={icon} size={14} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? <Skeleton className="h-8 w-28" /> : (
-          <>
-            <p className="text-2xl font-bold font-mono">{value}</p>
-            {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 space-y-1 overflow-hidden transition-all hover:border-primary/50">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+        <FaIcon icon={icon} size={12} className={`shrink-0 ${textColor}`} />
+        <span className="truncate">{label}</span>
+      </div>
+      {loading ? (
+        <Skeleton className="h-6 w-24" />
+      ) : (
+        <p className="font-bold font-mono text-lg tracking-tight truncate" title={value}>{value}</p>
+      )}
+      {sub && !loading && (
+        <p className="text-[10px] text-muted-foreground truncate" title={sub}>{sub}</p>
+      )}
+    </div>
   );
 }
 
@@ -472,7 +471,7 @@ export default function GastosPage() {
               <FaIcon icon={faTriangleExclamation} size={14} className="text-destructive" /> ¿Eliminar gasto?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Se eliminará <strong>"{deleteTarget?.description}"</strong> por{" "}
+              Se eliminará <strong>&quot;{deleteTarget?.description}&quot;</strong> por{" "}
               <strong>{deleteTarget ? fmt(Number(deleteTarget.amount)) : ""}</strong>.
               Esta acción no se puede deshacer.
             </AlertDialogDescription>

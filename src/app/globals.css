@@ -125,7 +125,12 @@
   }
 }
 
-/* ── Mobile-first utilities ──────────────────────────────────────────────────── */
+/* Mobile-first utilities */
+html, body {
+  /* Evita el escrol horizontal en todo el sitio por si un card o modal empuja el ancho */
+  max-width: 100vw;
+  overflow-x: hidden;
+}
 
 /* Hide scrollbar on mobile nav but keep scroll */
 .no-scrollbar {

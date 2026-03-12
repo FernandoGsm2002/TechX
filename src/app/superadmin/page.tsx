@@ -34,6 +34,7 @@ export default async function SuperadminPage() {
   const suspended = allOrgs.filter((o) => o.is_active === false && o.is_approved);
   const expiring  = allOrgs.filter((o) => {
     if (!o.subscription_end || !o.is_approved) return false;
+    // eslint-disable-next-line react-compiler/react-compiler
     const days = (new Date(o.subscription_end).getTime() - Date.now()) / 86400000;
     return days >= 0 && days <= 7;
   });

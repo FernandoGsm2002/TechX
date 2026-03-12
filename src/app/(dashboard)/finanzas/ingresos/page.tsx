@@ -154,23 +154,22 @@ function StatCard({ label, value, sub, icon: Icon, colorClass, loading }: {
   label: string; value: string; sub?: string;
   icon: React.ElementType; colorClass: string; loading: boolean;
 }) {
+  const textColor = colorClass.split(' ').find(c => c.startsWith('text-')) || 'text-muted-foreground';
   return (
-    <Card className="border-border/50 bg-card/60 backdrop-blur">
-      <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
-        <div className={`flex size-8 items-center justify-center rounded-lg ${colorClass}`}>
-          <Icon className="size-4" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? <Skeleton className="h-8 w-28" /> : (
-          <>
-            <p className="text-2xl font-bold font-mono">{value}</p>
-            {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 space-y-1 overflow-hidden transition-all hover:border-primary/50">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+        <Icon className={`size-3.5 shrink-0 ${textColor}`} />
+        <span className="truncate">{label}</span>
+      </div>
+      {loading ? (
+        <Skeleton className="h-6 w-24" />
+      ) : (
+        <p className="font-bold font-mono text-lg tracking-tight truncate" title={value}>{value}</p>
+      )}
+      {sub && !loading && (
+        <p className="text-[10px] text-muted-foreground truncate" title={sub}>{sub}</p>
+      )}
+    </div>
   );
 }
 
@@ -220,18 +219,15 @@ export default function IngresosPage() {
   const monthLabel = format(refMonth, "MMMM yyyy", { locale: es });
 
   // Filter
-  const filtered = useMemo(() => {
-    let result = rows;
-    if (sourceFilter !== "all") result = result.filter((r) => r.source === sourceFilter);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter((r) =>
-        r.description.toLowerCase().includes(q) ||
-        r.detail.toLowerCase().includes(q)
-      );
-    }
-    return result;
-  }, [rows, search, sourceFilter]);
+  let filtered = rows;
+  if (sourceFilter !== "all") filtered = filtered.filter((r) => r.source === sourceFilter);
+  if (search.trim()) {
+    const q = search.toLowerCase();
+    filtered = filtered.filter((r) =>
+      r.description.toLowerCase().includes(q) ||
+      r.detail.toLowerCase().includes(q)
+    );
+  }
 
   const columns: DataColumn<IncomeRow>[] = [
     {
@@ -341,7 +337,7 @@ export default function IngresosPage() {
       </div>
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <StatCard
           label="Total del mes"
           value={fmt(totalMes)}
