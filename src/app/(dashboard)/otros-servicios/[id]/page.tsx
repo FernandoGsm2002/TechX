@@ -127,7 +127,7 @@ export default function OtroServicioDetailPage() {
   const handleStatusChange = (newStatus: ServiceStatus) => {
     if (newStatus === "entregado") {
       const svcDays   = (servicio as any).warranty_days as number | null;
-      const srcDays   = svcDays ?? org?.warranty_days ?? 90;
+      const srcDays   = svcDays ?? 360;
       const preMonths = Math.max(1, Math.round(srcDays / 30));
       setWarrantyMonths(svcDays === 0 ? "" : String(preMonths));
       setNoWarrantyDeliver(svcDays === 0);
@@ -149,7 +149,7 @@ export default function OtroServicioDetailPage() {
         status:         "entregado",
         payment_status: paymentStatus,
         payment_method: paymentStatus === "pagado" ? paymentMethod : undefined,
-        warranty_days:  noWarrantyDeliver ? 0 : (parseInt(warrantyMonths) || 3) * 30,
+        warranty_days:  noWarrantyDeliver ? 0 : (parseInt(warrantyMonths) || 12) * 30,
       },
       {
         onSuccess: () => {

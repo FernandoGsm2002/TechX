@@ -71,23 +71,23 @@ export function Header() {
       }}
     >
       {/* Inner row */}
-      <div className="flex w-full items-center gap-2 px-4 h-14">
-        {/* Sidebar toggle (desktop) */}
-        <SidebarTrigger className="-ml-1 hidden md:flex" />
-        <Separator orientation="vertical" className="mr-2 h-4 hidden md:block" />
+      <div className="flex w-full items-center gap-2 px-3 md:px-4 h-14 min-w-0">
+        {/* Sidebar toggle (desktop lg+) */}
+        <SidebarTrigger className="-ml-1 hidden lg:flex shrink-0" />
+        <Separator orientation="vertical" className="mr-2 h-4 hidden lg:block shrink-0" />
 
-        {/* Breadcrumb */}
-        <Breadcrumb className="flex-1">
-          <BreadcrumbList>
-            <BreadcrumbItem>
+        {/* Breadcrumb — truncado en m\u00f3vil */}
+        <Breadcrumb className="flex-1 min-w-0 overflow-hidden">
+          <BreadcrumbList className="flex-wrap sm:flex-nowrap">
+            <BreadcrumbItem className="hidden sm:flex">
               <BreadcrumbLink href="/">Inicio</BreadcrumbLink>
             </BreadcrumbItem>
             {breadcrumbs.map((crumb) => (
               <React.Fragment key={crumb.href}>
-                <BreadcrumbSeparator />
+                <BreadcrumbSeparator className="hidden sm:flex" />
                 <BreadcrumbItem>
                   {crumb.isLast ? (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                    <BreadcrumbPage className="truncate max-w-[140px] sm:max-w-none">{crumb.label}</BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
                   )}
@@ -97,13 +97,13 @@ export function Header() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Search */}
-        <div className="hidden sm:flex flex-1 max-w-sm mx-4">
+        {/* Search — solo en lg+ */}
+        <div className="hidden lg:flex flex-1 max-w-sm mx-4">
           <BuscadorGlobal />
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <NotificationBell />
           <Button
             variant="ghost"

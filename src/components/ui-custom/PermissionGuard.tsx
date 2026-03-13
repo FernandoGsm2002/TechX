@@ -2,7 +2,8 @@
 
 import React from "react";
 import { useOrganization } from "@/contexts/OrganizationContext";
-import type { UserRole } from "@/types/database.types";
+import type { Database } from "@/lib/supabase/database.types";
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 interface PermissionGuardProps {
   /** Minimum role required. hierarchy: superadmin > admin > tecnico */

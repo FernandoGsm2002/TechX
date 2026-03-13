@@ -186,31 +186,36 @@ function PersistentTagInput({
 
 // ── Formulario de creación/edición ────────────────────────────────────────────
 
-type FormState = {
-  tags: string[];
-  deviceBrand: string; deviceModel: string; imei: string; serial: string;
-  hasPin: boolean; pinCode: string;
-  description: string;
-  warrantyMonths: string;  // meses (libre), '' = usar default, 'none' ignorado
-  noWarranty: boolean;     // Sin garantía
-  warrantyNotes: string;
-  guestMode: boolean; guestName: string; guestPhone: string; customerId: string;
-  price: string;
-  provider: string;
-  internalNotes: string;
-};
+interface FormState {
+  tags:            string[];
+  deviceBrand:     string;
+  deviceModel:     string;
+  imei:            string;
+  serial:          string;
+  hasPin:          boolean;
+  pinCode:         string;
+  description:     string;
+  warrantyMonths:  string;
+  noWarranty:      boolean;
+  warrantyNotes:   string;
+  guestMode:       boolean;
+  guestFirstName:  string;   // nombre(s) walk-in separado
+  guestLastName:   string;   // apellido walk-in separado
+  guestPhone:      string;
+  customerId:      string;
+  price:           string;
+  provider:        string;
+  internalNotes:   string;
+}
 
 const EMPTY_FORM: FormState = {
-  tags: [],
-  deviceBrand: "", deviceModel: "", imei: "", serial: "",
-  hasPin: false, pinCode: "",
-  description: "",
-  warrantyMonths: "", noWarranty: false, warrantyNotes: "",
-
-  guestMode: true, guestName: "", guestPhone: "", customerId: "",
-  price: "",
-  provider: "",
-  internalNotes: "",
+  tags: [], deviceBrand: "", deviceModel: "", imei: "", serial: "",
+  hasPin: false, pinCode: "", description: "",
+  warrantyMonths: "12", noWarranty: false, warrantyNotes: "",
+  guestMode: true,
+  guestFirstName: "", guestLastName: "", guestPhone: "",
+  customerId: "",
+  price: "", provider: "", internalNotes: "",
 };
 
 interface ServiceFormProps {
@@ -233,6 +238,10 @@ function ServiceForm({ open, onOpenChange, editing, onClose }: ServiceFormProps)
   React.useEffect(() => {
     if (open) {
       if (editing) {
+        const guestNameParts = editing.guest_name?.split(" ") ?? [];
+        const guestFirstName = guestNameParts[0] ?? "";
+        const guestLastName = guestNameParts.slice(1).join(" ") ?? "";
+
         setForm({
           tags:          editing.tags ?? [],
           deviceBrand:   editing.device_brand ?? "",
@@ -246,12 +255,13 @@ function ServiceForm({ open, onOpenChange, editing, onClose }: ServiceFormProps)
             ? ""
             : editing.warranty_days
               ? String(Math.max(1, Math.round(editing.warranty_days / 30)))
-              : "",
+              : "12",
           noWarranty:    editing.warranty_days === 0,
 
           warrantyNotes: editing.warranty_notes ?? "",
           guestMode:     !editing.customer_id,
-          guestName:     editing.guest_name ?? "",
+          guestFirstName: guestFirstName,
+          guestLastName:  guestLastName,
           guestPhone:    editing.guest_phone ?? "",
           customerId:    editing.customer_id ?? "",
           price:         String(editing.price ?? ""),
@@ -273,8 +283,8 @@ function ServiceForm({ open, onOpenChange, editing, onClose }: ServiceFormProps)
     if (form.tags.length === 0)                        e.tags        = "Agrega al menos un tag";
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) < 0)
                                                         e.price       = "Ingresa un precio valido";
-    if (form.guestMode && !form.guestName.trim())      e.guestName   = "Ingresa el nombre";
-    if (!form.guestMode && !form.customerId)           e.customerId  = "Selecciona un cliente";
+    if (form.guestMode && !form.guestFirstName.trim()) e.guestFirstName = "Ingresa el nombre";
+    if (!form.guestMode && !form.customerId)            e.customerId     = "Selecciona un cliente";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -295,11 +305,13 @@ function ServiceForm({ open, onOpenChange, editing, onClose }: ServiceFormProps)
         ? 0
         : form.warrantyMonths
           ? parseInt(form.warrantyMonths) * 30
-          : undefined,
+          : 360,
 
       warranty_notes:  form.warrantyNotes.trim() || null,
       customer_id:     form.guestMode ? null : (form.customerId || null),
-      guest_name:      form.guestMode ? (form.guestName.trim() || null) : null,
+      guest_name:      form.guestMode
+        ? [form.guestFirstName.trim(), form.guestLastName.trim()].filter(Boolean).join(" ") || null
+        : null,
       guest_phone:     form.guestMode ? (form.guestPhone.trim() || null) : null,
       price:           Number(form.price),
       // Status always starts as pendiente — changed later in the workflow
@@ -337,6 +349,17 @@ function ServiceForm({ open, onOpenChange, editing, onClose }: ServiceFormProps)
             {editing ? "Editar servicio" : "Nuevo servicio"}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Banner fiscal (solo lectura) */}
+        {org && (
+          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/40 border border-border/50 px-3 py-2 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">{org.name}</span>
+            {org.tax_id_number && (
+              <span>&middot; {(org as any).tax_id_name ?? "RUC"}: {org.tax_id_number}</span>
+            )}
+            <span>&middot; {org.currency_code ?? "PEN"}</span>
+          </div>
+        )}
 
         <div className="space-y-4 py-1">
 
@@ -479,13 +502,18 @@ function ServiceForm({ open, onOpenChange, editing, onClose }: ServiceFormProps)
             </div>
 
             {form.guestMode ? (
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Input placeholder="Nombre *" value={form.guestName}
-                    onChange={e => set("guestName", e.target.value)} className="h-9" />
-                  {errors.guestName && <p className="text-xs text-destructive mt-0.5">{errors.guestName}</p>}
+              <div className="space-y-2">
+                <p className="text-xs text-amber-600 font-medium">Datos del cliente (para el comprobante)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Input placeholder="Nombre(s) *" value={form.guestFirstName}
+                      onChange={e => set("guestFirstName", e.target.value)} className="h-9" />
+                    {errors.guestFirstName && <p className="text-xs text-destructive mt-0.5">{errors.guestFirstName}</p>}
+                  </div>
+                  <Input placeholder="Apellido" value={form.guestLastName}
+                    onChange={e => set("guestLastName", e.target.value)} className="h-9" />
                 </div>
-                <Input placeholder="Telefono" value={form.guestPhone}
+                <Input placeholder="Teléfono" value={form.guestPhone}
                   onChange={e => set("guestPhone", e.target.value)} className="h-9" />
               </div>
             ) : (
@@ -517,7 +545,7 @@ function ServiceForm({ open, onOpenChange, editing, onClose }: ServiceFormProps)
           <div className="space-y-1.5">
             <Label className="text-sm font-medium flex items-center gap-1.5">
               <DollarSign className="size-3.5 text-muted-foreground" />
-              Precio acordado <span className="text-destructive">*</span>
+              Precio del servicio <span className="text-destructive">*</span>
             </Label>
             <Input
               type="number" min={0} step="0.01" placeholder="0.00"
@@ -601,9 +629,9 @@ function StatusChangeDialog({ servicio, targetStatus, open, onClose }: StatusCha
   const [warrantyMonths, setWarrantyMonths] = useState<string>("");
   const [noWarrantyOS,   setNoWarrantyOS]   = useState(false);
 
-  const defaultMonths = org?.warranty_days
-    ? Math.round(org.warranty_days / 30)
-    : 3;
+  const defaultMonths = (org as any)?.otros_servicios_warranty_days
+    ? Math.round((org as any).otros_servicios_warranty_days / 30)
+    : 12;
 
   React.useEffect(() => {
     if (open) {
@@ -868,14 +896,14 @@ export default function OtrosServiciosPage() {
 
   const columns: DataColumn<ServicioExtended>[] = [
     {
-      key: "order_number" as keyof ServicioExtended,
+      key: "order_number",
       header: "#",
       cell: row => (
         <span className="text-xs font-mono text-muted-foreground">{row.order_number ?? "—"}</span>
       ),
     },
     {
-      key: "tags" as keyof ServicioExtended,
+      key: "tags",
       header: "Servicio / Dispositivo",
       cell: row => (
         <div className="space-y-1 min-w-0">
@@ -906,7 +934,7 @@ export default function OtrosServiciosPage() {
       ),
     },
     {
-      key: "guest_name" as keyof ServicioExtended,
+      key: "guest_name",
       header: "Cliente",
       className: "hidden md:table-cell",
       cell: row => {
@@ -925,7 +953,7 @@ export default function OtrosServiciosPage() {
       },
     },
     {
-      key: "status" as keyof ServicioExtended,
+      key: "status",
       header: "Estado",
       cell: row => {
         const currentStatus = row.status as ServiceStatus;
@@ -959,7 +987,7 @@ export default function OtrosServiciosPage() {
       },
     },
     {
-      key: "price" as keyof ServicioExtended,
+      key: "price",
       header: "Precio",
       cell: row => (
         <div className="text-right">
@@ -972,7 +1000,7 @@ export default function OtrosServiciosPage() {
       ),
     },
     {
-      key: "created_at" as keyof ServicioExtended,
+      key: "created_at",
       header: "Fecha",
       className: "hidden lg:table-cell",
       cell: row => (
@@ -982,7 +1010,7 @@ export default function OtrosServiciosPage() {
       ),
     },
     {
-      key: "id" as keyof ServicioExtended,
+      key: "id",
       header: "",
       cell: row => (
         <div className="flex items-center justify-end gap-1">

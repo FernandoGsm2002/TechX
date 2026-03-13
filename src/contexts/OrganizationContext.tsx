@@ -9,7 +9,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Database } from "@/types/database.types";
+import type { Database } from "@/lib/supabase/database.types";
 type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 type UserRole = Database["public"]["Enums"]["user_role"];
 import { formatMoneyGlobal, CURRENCY_SYMBOLS } from "@/lib/fiscalConfig";

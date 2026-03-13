@@ -23,7 +23,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
-import type { Organization } from "@/types/database.types";
+import type { Database } from "@/lib/supabase/database.types";
+type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 import { cn } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────

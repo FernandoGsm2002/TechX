@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   faPlus, faTicket, faArrowRight, faPowerOff, faLock, faLockOpen,
   faCamera, faXmark, faUpload, faSpinner, faUserSlash, faUser,
+  faChevronDown, faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { ShieldCheck } from "lucide-react";
 import { FaIcon } from "@/components/ui-custom/FaIcon";
@@ -67,25 +68,29 @@ export default function TicketsPage() {
   const createMutation = useCreateTicket();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // ── Form state (plain useState — no form library needed here) ───────────────
-  const [customerId,   setCustomerId]   = useState("");
-  const [guestMode,    setGuestMode]    = useState(false);  // walk-in
-  const [guestName,    setGuestName]    = useState("");
-  const [guestPhone,   setGuestPhone]   = useState("");
-  const [deviceType,   setDeviceType]   = useState("");
-  const [deviceBrand,  setDeviceBrand]  = useState("");
-  const [deviceModel,  setDeviceModel]  = useState("");
-  const [imei,         setImei]         = useState("");
-  const [issue,        setIssue]        = useState("");
-  const [finalAmount,  setFinalAmount]  = useState("");
-  const [powerOn,      setPowerOn]      = useState<boolean>(true);
-  const [hasLock,      setHasLock]      = useState<boolean>(false);
-  const [lockType,     setLockType]     = useState("");
-  const [lockCode,     setLockCode]     = useState("");
-  const [intakeNotes,  setIntakeNotes]  = useState("");
-  // warranty: 'none' = sin garantía, '' = usar default del taller, número = meses custom
-  const [warrantyMonthsCreate, setWarrantyMonthsCreate] = useState<string>("");
-  const [noWarranty, setNoWarranty] = useState(false);
+  // ── Form state ───────────────────────────────────────────────────────────────
+  const [customerId,      setCustomerId]      = useState("");
+  const [guestMode,       setGuestMode]       = useState(false);  // walk-in
+  const [guestFirstName,  setGuestFirstName]  = useState("");     // nombre(s) walk-in
+  const [guestLastName,   setGuestLastName]   = useState("");     // apellido walk-in
+  const [guestPhone,      setGuestPhone]      = useState("");
+  const [deviceType,      setDeviceType]      = useState("");
+  const [deviceBrand,     setDeviceBrand]     = useState("");
+  const [deviceModel,     setDeviceModel]     = useState("");
+  const [imei,            setImei]            = useState("");
+  const [issue,           setIssue]           = useState("");
+  const [finalAmount,     setFinalAmount]     = useState("");
+  const [powerOn,         setPowerOn]         = useState<boolean>(true);
+  const [hasLock,         setHasLock]         = useState<boolean>(false);
+  const [lockType,        setLockType]        = useState("");
+  const [lockCode,        setLockCode]        = useState("");
+  const [intakeNotes,     setIntakeNotes]     = useState("");
+  // Garantia: meses + condiciones especificas de esta reparacion
+  const [warrantyMonthsCreate, setWarrantyMonthsCreate] = useState<string>("12");
+  const [warrantyNotesCreate,  setWarrantyNotesCreate]  = useState("");
+  const [noWarranty,           setNoWarranty]           = useState(false);
+  // Acordeon de terminos del taller (solo lectura)
+  const [termsOpen,            setTermsOpen]            = useState(false);
 
   // Photo upload state
   const [photoFile,    setPhotoFile]    = useState<File | null>(null);
@@ -100,7 +105,7 @@ export default function TicketsPage() {
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (guestMode) {
-      if (!guestName.trim()) e.guestName = "Ingresa el nombre del cliente";
+      if (!guestFirstName.trim()) e.guestFirstName = "Ingresa el nombre del cliente";
     } else {
       if (!customerId) e.customer = "Selecciona un cliente";
     }
@@ -145,10 +150,12 @@ export default function TicketsPage() {
         imei:  imei || undefined,
       };
 
+      const guestFullName = [guestFirstName.trim(), guestLastName.trim()].filter(Boolean).join(" ") || null;
+
       const payload: CreateTicketPayload = {
         organization_id: org.id,
         customer_id:     guestMode ? null : customerId,
-        guest_name:      guestMode ? guestName.trim() : null,
+        guest_name:      guestMode ? guestFullName : null,
         guest_phone:     guestMode ? (guestPhone.trim() || null) : null,
         status:          "recibido",
         device_details:  device as Record<string, unknown>,
@@ -163,7 +170,8 @@ export default function TicketsPage() {
           ? 0
           : warrantyMonthsCreate
             ? parseInt(warrantyMonthsCreate) * 30
-            : undefined,
+            : 360,
+        warranty_notes:  warrantyNotesCreate.trim() || null,
       };
 
       const created = await createMutation.mutateAsync(payload);
@@ -178,11 +186,11 @@ export default function TicketsPage() {
       }
 
       // Reset form
-      setCustomerId(""); setGuestName(""); setGuestPhone(""); setGuestMode(false);
+      setCustomerId(""); setGuestFirstName(""); setGuestLastName(""); setGuestPhone(""); setGuestMode(false);
       setDeviceType(""); setDeviceBrand(""); setDeviceModel("");
       setImei(""); setIssue(""); setFinalAmount(""); setPowerOn(true);
       setHasLock(false); setLockType(""); setLockCode(""); setIntakeNotes("");
-      setWarrantyMonthsCreate(""); setNoWarranty(false);
+      setWarrantyMonthsCreate("12"); setWarrantyNotesCreate(""); setNoWarranty(false); setTermsOpen(false);
       removePhoto();
       setDialogOpen(false);
     } catch {
@@ -192,9 +200,10 @@ export default function TicketsPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    customerId, guestMode, guestName, guestPhone,
+    customerId, guestMode, guestFirstName, guestLastName, guestPhone,
     deviceType, deviceBrand, deviceModel, imei, issue,
     finalAmount, powerOn, hasLock, lockType, lockCode, intakeNotes,
+    warrantyMonthsCreate, warrantyNotesCreate, noWarranty,
     photoFile, org, createMutation,
   ]);
 
@@ -396,6 +405,20 @@ export default function TicketsPage() {
             <DialogTitle>Nuevo Ticket de Reparación</DialogTitle>
           </DialogHeader>
 
+          {/* ── Banner fiscal de la empresa (solo lectura) ── */}
+          {org && (
+            <div className="flex items-center gap-2 rounded-lg bg-muted/40 border border-border/50 px-3 py-2 text-xs text-muted-foreground">
+              <FaIcon icon={faUser} size={10} className="shrink-0 text-primary" />
+              <span className="font-medium text-foreground">{org.name}</span>
+              {org.tax_id_number && (
+                <span className="text-muted-foreground">
+                  &middot; {(org as any).tax_id_name ?? "RUC"}: {org.tax_id_number}
+                </span>
+              )}
+              <span className="text-muted-foreground">&middot; {currencySymbol} ({(org as any).currency_code ?? "PEN"})</span>
+            </div>
+          )}
+
           <div className="space-y-5 py-1">
 
             {/* ── Cliente ── */}
@@ -405,7 +428,7 @@ export default function TicketsPage() {
                 <Label>Cliente</Label>
                 <button
                   type="button"
-                  onClick={() => { setGuestMode(!guestMode); setCustomerId(""); setGuestName(""); setGuestPhone(""); }}
+                  onClick={() => { setGuestMode(!guestMode); setCustomerId(""); setGuestFirstName(""); setGuestLastName(""); setGuestPhone(""); }}
                   className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors ${
                     guestMode
                       ? "bg-amber-500/10 text-amber-600 border-amber-500/40"
@@ -418,31 +441,38 @@ export default function TicketsPage() {
               </div>
 
               {guestMode ? (
-                /* Walk-in: nombre + teléfono al vuelo */
-                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-3">
-                  <p className="text-xs text-amber-600 font-medium">
-                    Datos opcionales para el comprobante
-                  </p>
+                /* Walk-in: nombre, apellido + teléfono */
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
+                  <p className="text-xs text-amber-600 font-medium">Datos del cliente (para el comprobante)</p>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <Label className="text-xs">Nombre *</Label>
+                      <Label className="text-xs">Nombre(s) *</Label>
                       <Input
-                        placeholder="Carlos Pérez"
-                        value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
+                        placeholder="Carlos"
+                        value={guestFirstName}
+                        onChange={(e) => setGuestFirstName(e.target.value)}
                         className="h-8 text-sm"
                       />
-                      {errors.guestName && <p className="text-xs text-destructive">{errors.guestName}</p>}
+                      {errors.guestFirstName && <p className="text-xs text-destructive">{errors.guestFirstName}</p>}
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Teléfono</Label>
+                      <Label className="text-xs">Apellido</Label>
                       <Input
-                        placeholder="+51 999 999 999"
-                        value={guestPhone}
-                        onChange={(e) => setGuestPhone(e.target.value)}
+                        placeholder="Pérez"
+                        value={guestLastName}
+                        onChange={(e) => setGuestLastName(e.target.value)}
                         className="h-8 text-sm"
                       />
                     </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Teléfono</Label>
+                    <Input
+                      placeholder="+51 999 999 999"
+                      value={guestPhone}
+                      onChange={(e) => setGuestPhone(e.target.value)}
+                      className="h-8 text-sm"
+                    />
                   </div>
                 </div>
               ) : (
@@ -697,10 +727,10 @@ export default function TicketsPage() {
               {errors.issue && <p className="text-xs text-destructive">{errors.issue}</p>}
             </div>
 
-            {/* ── Precio final + Notas ── */}
+            {/* ── Precio + Notas internas ── */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>Precio final ({currencySymbol})</Label>
+                <Label>Precio del servicio ({currencySymbol})</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -724,16 +754,15 @@ export default function TicketsPage() {
             <div className="space-y-3">
               <Label className="flex items-center gap-1.5 text-sm">
                 <ShieldCheck className="size-3.5 text-emerald-400" />
-                Garantia de esta reparacion
+                Garantía de esta reparación
                 <span className="text-xs font-normal text-muted-foreground">(opcional)</span>
               </Label>
 
               {/* Fila: Sin garantía toggle + input libre de meses */}
               <div className="flex items-center gap-2">
-                {/* Botón Sin Garantía */}
                 <button
                   type="button"
-                  onClick={() => { setNoWarranty(!noWarranty); setWarrantyMonthsCreate(""); }}
+                  onClick={() => { setNoWarranty(!noWarranty); if (!noWarranty) setWarrantyMonthsCreate(""); }}
                   className={`shrink-0 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
                     noWarranty
                       ? "border-amber-500 bg-amber-500/15 text-amber-400"
@@ -743,13 +772,12 @@ export default function TicketsPage() {
                   Sin garantía
                 </button>
 
-                {/* Input libre de meses */}
                 <div className="relative flex-1">
                   <Input
                     type="number"
                     min={1}
                     max={120}
-                    placeholder="Ej: 3"
+                    placeholder="12"
                     value={warrantyMonthsCreate}
                     disabled={noWarranty}
                     onChange={e => { setWarrantyMonthsCreate(e.target.value); setNoWarranty(false); }}
@@ -761,13 +789,43 @@ export default function TicketsPage() {
                 </div>
               </div>
 
+              {/* Condiciones especificas de garantia para esta reparacion */}
+              {!noWarranty && (
+                <Input
+                  placeholder="Condiciones específicas (ej: no aplica si hay daño por agua)"
+                  value={warrantyNotesCreate}
+                  onChange={e => setWarrantyNotesCreate(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              )}
+
               <p className="text-[11px] text-muted-foreground">
                 {noWarranty
                   ? "⚠ Sin garantía — no se registrará garantía al entregar"
                   : warrantyMonthsCreate
-                    ? `${warrantyMonthsCreate} mes(es) · ${parseInt(warrantyMonthsCreate) * 30} días de garantía`
-                    : "Vacío: se usará el default del taller al entregar"}
+                    ? `${warrantyMonthsCreate} mes(es) · ${parseInt(warrantyMonthsCreate) * 30} días — los Términos globales del taller se añaden automáticamente al comprobante`
+                    : "12 meses por defecto — los Términos globales del taller se añaden automáticamente"}
               </p>
+
+              {/* Acordeón: Ver Términos del Taller */}
+              {(org?.receipt_notes || org?.receipt_footer) && (
+                <div className="rounded-lg border border-border/50 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setTermsOpen(!termsOpen)}
+                    className="w-full flex items-center justify-between px-3 py-2 text-xs text-muted-foreground hover:bg-muted/30 transition-colors"
+                  >
+                    <span className="font-medium">Ver Términos y Condiciones del Taller (se imprimen automáticamente)</span>
+                    <FaIcon icon={termsOpen ? faChevronUp : faChevronDown} size={10} />
+                  </button>
+                  {termsOpen && (
+                    <div className="px-3 py-2 bg-muted/20 text-xs text-muted-foreground space-y-1 border-t border-border/30">
+                      {org?.receipt_notes && <p>{org.receipt_notes}</p>}
+                      {org?.receipt_footer && <p className="font-medium">{org.receipt_footer}</p>}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

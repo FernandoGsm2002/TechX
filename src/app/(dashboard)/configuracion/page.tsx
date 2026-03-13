@@ -107,7 +107,6 @@ export default function ConfiguracionPage() {
   const [formTaxIdNum,   setFormTaxIdNum]   = useState("");
 
   // Receipt / tickets
-  const [formWarranty,   setFormWarranty]   = useState("90");
   const [formNotes,      setFormNotes]      = useState("");
   const [formFooter,     setFormFooter]     = useState("");
   const [formPrefix,     setFormPrefix]     = useState("TK");
@@ -135,7 +134,6 @@ export default function ConfiguracionPage() {
     setFormTaxLabel(org.tax_id_name ?? "RUC");
     setFormTaxPct(String(org.tax_percentage ?? 18));
     setFormTaxIdNum(org.tax_id_number ?? "");
-    setFormWarranty(String((org as any).warranty_days ?? 90));
     setFormNotes((org as any).receipt_notes ?? "");
     setFormFooter((org as any).receipt_footer ?? "Gracias por confiar en nosotros.");
     setFormPrefix((org as any).ticket_prefix ?? "TK");
@@ -238,7 +236,6 @@ export default function ConfiguracionPage() {
         phone:             formPhone.trim() || null,
         website:           formWebsite.trim() || null,
         whatsapp:          formWhatsapp.trim() || null,
-        warranty_days:     parseInt(formWarranty) || 90,
         receipt_notes:     formNotes.trim() || null,
         receipt_footer:    formFooter.trim() || null,
         ticket_prefix:     formPrefix.trim() || "TK",
@@ -437,7 +434,7 @@ export default function ConfiguracionPage() {
       {/* ── 4. Comprobantes / Tickets ── */}
       <Section icon={faFileInvoice} title="Comprobantes y Tickets"
         description="Personaliza el contenido de tus recibos e impresiones">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <div className="space-y-2">
             <Label htmlFor="cfg-prefix">Prefijo de Ticket</Label>
             <div className="relative">
@@ -447,15 +444,6 @@ export default function ConfiguracionPage() {
                 {formPrefix || "TK"}-2026-0001
               </span>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="cfg-warranty" className="flex items-center gap-1.5">
-              <FaIcon icon={faShieldHalved} size={12} className="text-muted-foreground" />
-              Garantía por Defecto (días)
-            </Label>
-            <Input id="cfg-warranty" type="number" min={0} max={3650}
-              placeholder="90" value={formWarranty}
-              onChange={(e) => setFormWarranty(e.target.value)} />
           </div>
         </div>
 

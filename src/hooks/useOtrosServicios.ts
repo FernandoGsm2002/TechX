@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/contexts/OrganizationContext";
 import { notifyAdmins } from "@/lib/notifyAdmins";
-import type { Database } from "@/types/database.types";
+import type { Database } from "@/lib/supabase/database.types";
 
 type OS = Database["public"]["Tables"]["otros_servicios"]["Row"];
 export type OtroServicioRow = OS;

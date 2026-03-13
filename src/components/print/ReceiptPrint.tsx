@@ -57,9 +57,11 @@ export interface ReceiptData {
   total:       number;
   paymentMethod?: string | null;
   // Footer
-  notes?:      string | null;
-  footer?:     string | null;
-  warrantyDays?: number | null;
+  notes?:        string | null;
+  footer?:       string | null;
+  warrantyDays?:  number | null;
+  /** Condiciones especificas de garantia de este ticket (imprime tras los dias) */
+  warrantyNotes?: string | null;
 }
 
 // ── CSS for thermal printer ────────────────────────────────────────────────────
@@ -154,7 +156,9 @@ function buildReceiptHtml(d: ReceiptData): string {
     : 0;
   const subtotalForDisplay = grandTotal - taxAmount;
 
-  const taxLine = d.showIgv && d.taxPct > 0 && taxAmount > 0
+  // nota_venta: solo muestra el TOTAL, sin desglose de impuesto
+  const isNotaVenta = d.docType === "nota_venta" || d.docType === "nota_fiscal" || d.docType === "cupom";
+  const taxLine = !isNotaVenta && d.showIgv && d.taxPct > 0 && taxAmount > 0
     ? `<div class="totals-row small">
          <span>${d.taxLabel} (${d.taxPct}%)</span>
          <span>${formatNumberGlobal(taxAmount, d.currencyCode)}</span>
@@ -166,8 +170,12 @@ function buildReceiptHtml(d: ReceiptData): string {
     : "";
 
   const warrantyLine = d.warrantyDays && d.warrantyDays > 0
-    ? `<p class="footer-text">Garantia: ${d.warrantyDays} dias desde la fecha de emision.</p>`
-    : "";
+    ? `<p class="footer-text">Garantia: ${d.warrantyDays} dias desde la fecha de emision.${
+        d.warrantyNotes ? ` ${d.warrantyNotes}` : ""
+      }</p>`
+    : d.warrantyNotes
+      ? `<p class="footer-text">Condicion de garantia: ${d.warrantyNotes}</p>`
+      : "";
 
   const notesHtml = d.notes
     ? `<p class="footer-text" style="margin-top:2px">${d.notes.replace(/\n/g, "<br/>")}</p>`

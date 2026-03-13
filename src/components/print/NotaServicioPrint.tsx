@@ -13,6 +13,7 @@ type OrgForPrint = {
   tax_id_name?: string | null;
   currency_code: string;
   warranty_days?: number | null;
+  otros_servicios_warranty_days?: number | null;
   receipt_notes?: string | null;
   receipt_footer?: string | null;
 } | null;
@@ -36,7 +37,7 @@ export function printOtroServicioNota(servicio: any, org: OrgForPrint) {
   const tagsArr: string[] = Array.isArray(servicio.tags) ? servicio.tags : [];
   const clientName = servicio.guest_name ?? servicio.customers?.full_name ?? "Consumidor Final";
   const clientPhone = servicio.guest_phone ?? servicio.customers?.phone ?? null;
-  const warrantyDays: number = servicio.warranty_days ?? org?.warranty_days ?? 0;
+  const warrantyDays: number = servicio.warranty_days ?? org?.otros_servicios_warranty_days ?? 30;
 
   const css = `
     * { box-sizing: border-box; margin: 0; padding: 0; }

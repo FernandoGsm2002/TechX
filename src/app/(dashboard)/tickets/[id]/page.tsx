@@ -138,7 +138,7 @@ export default function TicketDetailPage() {
     if (newStatus === "entregado") {
       // Mostrar dialog de cobro + garantia al entregar
       const ticketWDays = (ticket as any).warranty_days as number | null;
-      const sourceDays  = ticketWDays ?? org?.warranty_days ?? 90;
+      const sourceDays  = ticketWDays ?? 360;
       const preMonths   = Math.max(1, Math.round(sourceDays / 30));
       setWarrantyMonths(String(preMonths));
       setNoWarrantyDeliver(ticketWDays === 0);
@@ -158,7 +158,7 @@ export default function TicketDetailPage() {
         status:         "entregado", 
         payment_status: paymentStatus,
         payment_method: paymentStatus === "pagado" ? paymentMethod : undefined,
-        warranty_days:  noWarrantyDeliver ? 0 : (parseInt(warrantyMonths) || 3) * 30,
+        warranty_days:  noWarrantyDeliver ? 0 : (parseInt(warrantyMonths) || 12) * 30,
       },
       {
         onSuccess: () => {
@@ -291,7 +291,7 @@ export default function TicketDetailPage() {
               orgWhatsapp={(org as any)?.whatsapp ?? null}
               ticketId={ticket.id.slice(0, 8).toUpperCase()}
               device={[device.brand, device.model, device.type].filter(Boolean).join(" ") || "Equipo"}
-              warrantyDays={(org as any)?.warranty_days ?? null}
+              warrantyDays={(ticket as any).warranty_days ?? 360}
             />
           )}
 
@@ -1034,8 +1034,8 @@ export default function TicketDetailPage() {
             total,
             paymentMethod,
             notes:   org.receipt_notes,
-            footer:  org.receipt_footer,
-            warrantyDays: org.warranty_days ?? null,
+            warrantyDays: (ticket as any).warranty_days ?? 360,
+            warrantyNotes: (ticket as any).warranty_notes ?? null,
           });
         }}
       />

@@ -132,6 +132,8 @@ export type CreateTicketPayload = Pick<
   guest_phone?:  string | null;
   // Per-ticket warranty override (days)
   warranty_days?: number | null;
+  // Specific warranty conditions for this ticket (prints on receipt)
+  warranty_notes?: string | null;
 };
 
 export function useCreateTicket() {

@@ -20,15 +20,12 @@ export default function DashboardLayout({
       <Suspense fallback={<div className="w-64 bg-sidebar shrink-0" />}>
         <AppSidebar />
       </Suspense>
-      <SidebarInset className="flex flex-col min-h-svh">
+      <SidebarInset className="flex flex-col min-h-svh min-w-0">
         <Header />
         {/* Realtime subscriptions — invisible, activo globalmente */}
         <RealtimeProvider />
-        {/* Main content — padding-bottom accounts for MobileNav on small screens */}
-        <main
-          className="flex-1 overflow-auto p-4 md:pb-4"
-          style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)" }}
-        >
+        {/* Main content: pb en móvil incluye MobileNav (54px); en desktop es p-4 normal */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-[calc(54px+env(safe-area-inset-bottom,0px))] lg:pb-4">
           {children}
         </main>
         <MobileNav />
