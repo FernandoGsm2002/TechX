@@ -246,8 +246,7 @@ function buildReceiptHtml(d: ReceiptData): string {
 // ── Print utility ─────────────────────────────────────────────────────────────
 
 export function printReceipt(data: ReceiptData) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const win = window.open("", "_blank", "width=360,height=600,toolbar=0,menubar=0") as any;
+  const win = window.open("", "_blank", "width=360,height=600,toolbar=0,menubar=0");
   if (!win) return;
   win.document.write(`
     <!DOCTYPE html>

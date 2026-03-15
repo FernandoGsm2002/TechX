@@ -148,12 +148,10 @@ const LABEL_STYLE = `
   }
   /* Right column (tear-off stub) */
   .stub-id {
-    font-size: 8pt;
+    font-size: 7pt;
     font-weight: bold;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    letter-spacing: 1px;
-    transform: rotate(180deg);
+    text-align: center;
+    letter-spacing: 0.5px;
   }
   .stub-name {
     font-size: 5pt;
@@ -165,6 +163,12 @@ const LABEL_STYLE = `
     font-size: 5pt;
     color: #888;
     text-align: center;
+  }
+  .qr-code {
+    width: 44px;
+    height: 44px;
+    display: block;
+    margin: 0 auto;
   }
 `;
 
@@ -195,8 +199,7 @@ export function DeviceLabelPrint({ data, variant = "button" }: DeviceLabelPrintP
     const content = labelRef.current?.innerHTML;
     if (!content) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const win = window.open("", "_blank", "width=400,height=250,toolbar=0,menubar=0") as any;
+    const win = window.open("", "_blank", "width=400,height=250,toolbar=0,menubar=0");
     if (!win) return;
 
     win.document.write(`
@@ -293,8 +296,15 @@ export function DeviceLabelPrint({ data, variant = "button" }: DeviceLabelPrintP
             )}
           </div>
 
-          {/* ── RIGHT: Talón de identificación (para pegar al equipo) ── */}
+          {/* ── RIGHT: Talón de identificación con QR ── */}
           <div className="right">
+            {/* QR code gratuito via api.qrserver.com — codifica el número de ticket */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=44x44&data=${encodeURIComponent(ticketShort)}&format=png&margin=0`}
+              alt={`QR ${ticketShort}`}
+              className="qr-code"
+            />
             <div className="stub-id">{ticketShort}</div>
             <div className="stub-name">{data.customerName.split(" ")[0]}</div>
             <div className="stub-date">{dateStr}</div>

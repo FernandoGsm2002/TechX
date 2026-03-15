@@ -629,8 +629,8 @@ function StatusChangeDialog({ servicio, targetStatus, open, onClose }: StatusCha
   const [warrantyMonths, setWarrantyMonths] = useState<string>("");
   const [noWarrantyOS,   setNoWarrantyOS]   = useState(false);
 
-  const defaultMonths = (org as any)?.otros_servicios_warranty_days
-    ? Math.round((org as any).otros_servicios_warranty_days / 30)
+  const defaultMonths = org?.warranty_days
+    ? Math.round(org.warranty_days / 30)
     : 12;
 
   React.useEffect(() => {
@@ -638,7 +638,7 @@ function StatusChangeDialog({ servicio, targetStatus, open, onClose }: StatusCha
       setPaymentChoice("cobrado");
       setPaymentMethod("efectivo");
       // Pre-fill: si warranty_days === 0 activa Sin Garantía, sino pre-fill en meses
-      const svcDays = (servicio as any).warranty_days as number | null;
+      const svcDays = servicio.warranty_days;
       if (svcDays === 0) {
         setNoWarrantyOS(true);
         setWarrantyMonths("");

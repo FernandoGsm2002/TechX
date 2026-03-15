@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { SuperadminOrgsClient } from "./SuperadminOrgsClient";
 
-const SUPERADMIN_EMAIL = "fernandoapple2002@gmail.com";
+const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? "";
 
 export const metadata: Metadata = {
   title: "Superadmin · TechX",

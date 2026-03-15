@@ -42,8 +42,7 @@ function useIngresos(monthOffset = 0) {
   return useQuery({
     queryKey: ["ingresos", monthOffset],
     queryFn: async (): Promise<IncomeRow[]> => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const supabase = createClient() as any;
+      const supabase = createClient();
       const now   = new Date();
       const ref   = subMonths(now, monthOffset);
       const start = startOfMonth(ref).toISOString();

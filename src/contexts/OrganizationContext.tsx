@@ -174,7 +174,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         taxIdName:       orgState.taxLabel,
         subscriptionEnd: orgState.organization?.subscription_end ?? null,
         planType:        orgState.organization?.plan_type ?? null,
-        enableOtrosServicios: !!(orgState.organization as any)?.enable_otros_servicios,
+        enableOtrosServicios: !!(orgState.organization?.enable_otros_servicios),
         formatCurrency,
         refresh:    fetchData,
         refreshOrg: fetchData,
