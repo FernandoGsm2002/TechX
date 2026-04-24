@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TechX</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #0a0a0f; display: flex; align-items: center; justify-content: center; font-family: system-ui, sans-serif; color: #f8fafc; }
+    .wrap { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .logo { width: 72px; height: 72px; border-radius: 16px; }
+    .spinner { width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.08); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .name { font-size: 22px; font-weight: 700; color: #f1f5f9; letter-spacing: -0.3px; }
+    p { font-size: 13px; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img src="https://techxpe.com/icons/icon-192x192.png" alt="TechX" class="logo" onerror="this.style.display='none'" />
+    <div class="name">TechX</div>
+    <div class="spinner"></div>
+    <p>Iniciando aplicación…</p>
+  </div>
+  <script>
+    // TECHX_APP_URL se inyecta en tiempo de build por lib.rs.
+    // Este archivo solo se muestra un instante antes de que Rust navegue a la URL real.
+    // Si ves esta pantalla por más de 3 segundos, configura TECHX_APP_URL en tu build.
+  </script>
+</body>
+</html>
