@@ -159,7 +159,7 @@ export default function TutorialesPage() {
                 style={{ width: "100%", display: "block" }} 
                 poster="/techxlighmode.png"
               >
-                <source src="/videos/anuncio2.mov" type="video/mp4" />
+                <source src="/videos/anuncio2.mp4" type="video/mp4" />
                 Tu navegador no soporta el formato de video.
               </video>
             </div>
