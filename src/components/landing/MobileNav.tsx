@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "#features", label: "Funcionalidades",  sub: "Todo lo que incluye TechX" },
   { href: "#how",      label: "Cómo funciona",    sub: "Del ticket al cobro en 3 pasos" },
   { href: "#pricing",  label: "Precios",           sub: "Planes desde $2/mes" },
+  { href: "/tutoriales", label: "Tutoriales",     sub: "Guías de uso e instalación" },
 ] as const;
 
 export function MobileNav() {

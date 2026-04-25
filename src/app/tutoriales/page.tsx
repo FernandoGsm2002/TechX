@@ -165,7 +165,7 @@ export default function TutorialesPage() {
             </div>
             
             <InfoBox>
-              Recomendamos ver el video en pantalla completa para poder apreciar mejor los detalles de la interfaz.
+              Recomendamos ver el video en pantalla completa o <strong>en modo horizontal</strong> en tu dispositivo móvil para poder apreciar mejor los detalles de la interfaz.
             </InfoBox>
           </DocSection>
 
