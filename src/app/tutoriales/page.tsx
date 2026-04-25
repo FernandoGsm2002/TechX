@@ -11,6 +11,17 @@ const NAV = [
     group: "CÓMO EMPEZAR",
     items: [
       { id: "bienvenida", label: "Bienvenido a TechX" },
+    ],
+  },
+  {
+    group: "CÓMO USAR",
+    items: [
+      { id: "como-usar", label: "Video tutorial" },
+    ],
+  },
+  {
+    group: "INSTALACIÓN",
+    items: [
       { id: "windows", label: "Instalar en Windows" },
     ],
   },
@@ -136,9 +147,33 @@ export default function TutorialesPage() {
 
           <Divider />
 
+          {/* Cómo Usar (Video) */}
+          <DocSection id="como-usar" onVisible={() => setActive("como-usar")}>
+            <Breadcrumb>Cómo usar</Breadcrumb>
+            <h2 style={h2}>Video tutorial</h2>
+            <Lead>Aprende a utilizar las funciones principales de TechX en este breve video.</Lead>
+
+            <div style={{ marginTop: 24, borderRadius: 12, overflow: "hidden", border: "1px solid #E5E7EB", backgroundColor: "#000" }}>
+              <video 
+                controls 
+                style={{ width: "100%", display: "block" }} 
+                poster="/techxlighmode.png"
+              >
+                <source src="/videos/anuncio2.mov" type="video/mp4" />
+                Tu navegador no soporta el formato de video.
+              </video>
+            </div>
+            
+            <InfoBox>
+              Recomendamos ver el video en pantalla completa para poder apreciar mejor los detalles de la interfaz.
+            </InfoBox>
+          </DocSection>
+
+          <Divider />
+
           {/* Windows */}
           <DocSection id="windows" onVisible={() => setActive("windows")}>
-            <Breadcrumb>Cómo empezar</Breadcrumb>
+            <Breadcrumb>Instalación</Breadcrumb>
             <h2 style={h2}>Instalar en Windows</h2>
             <Lead>Aplicación de escritorio para Windows 10 y 11. Se instala en menos de un minuto.</Lead>
 
@@ -208,7 +243,7 @@ export default function TutorialesPage() {
 
           {/* Safari */}
           <DocSection id="safari" onVisible={() => setActive("safari")}>
-            <Breadcrumb>Aplicación móvil</Breadcrumb>
+            <Breadcrumb>Instalación</Breadcrumb>
             <h2 style={h2}>Safari</h2>
             <Lead>
               Instala TechX en tu iPhone o iPad desde Safari.
@@ -239,7 +274,7 @@ export default function TutorialesPage() {
 
           {/* Chrome móvil */}
           <DocSection id="chrome-movil" onVisible={() => setActive("chrome-movil")}>
-            <Breadcrumb>Aplicación móvil</Breadcrumb>
+            <Breadcrumb>Instalación</Breadcrumb>
             <h2 style={h2}>Chrome · iOS y Android</h2>
             <Lead>
               El proceso de instalación es el mismo en iPhone y Android cuando usas Google Chrome.
@@ -272,7 +307,7 @@ export default function TutorialesPage() {
 
           {/* Chrome PC */}
           <DocSection id="chrome-pc" onVisible={() => setActive("chrome-pc")}>
-            <Breadcrumb>Aplicación móvil</Breadcrumb>
+            <Breadcrumb>Instalación</Breadcrumb>
             <h2 style={h2}>Chrome en PC</h2>
             <Lead>
               En Windows, Mac o Linux puedes instalar TechX como una app de escritorio directamente desde Chrome,

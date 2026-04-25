@@ -19,6 +19,7 @@ import {
   faArrowTrendDown,
   faArrowTrendUp,
   faShieldHalved,
+  faCirclePlay,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,8 @@ const NAV_ITEMS: NavItem[] = [
   //  CUENTA 
   { title: "Config",     href: "/configuracion",     icon: faGear,              hiddenForRoles: ["tecnico"], sectionStart: true },
   { title: "Perfil",     href: "/perfil",            icon: faCircleUser,        sectionStart: true },
+  // AYUDA
+  { title: "Tutoriales", href: "/tutoriales",        icon: faCirclePlay,        sectionStart: true },
 ];
 
 //  Component 

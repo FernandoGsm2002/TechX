@@ -30,6 +30,7 @@ import {
   faBellConcierge,
   faFileInvoiceDollar,
   faUserGear,
+  faCirclePlay,
 } from "@fortawesome/free-solid-svg-icons";
 import { cn } from "@/lib/utils";
 import {
@@ -169,6 +170,17 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Superadmin",     href: "/superadmin",      icon: faShieldHalved,  superadminOnly: true },
       { title: "Organizaciones", href: "/superadmin/orgs", icon: faBuilding,      superadminOnly: true },
+    ],
+  },
+
+  //  7. SOPORTE Y AYUDA 
+  {
+    label:          "Ayuda",
+    icon:           faCirclePlay,
+    color:          "text-sky-400",
+    adminOnly:      false,
+    items: [
+      { title: "Tutoriales", href: "/tutoriales", icon: faCirclePlay },
     ],
   },
 ];
