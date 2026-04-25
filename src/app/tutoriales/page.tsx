@@ -156,8 +156,9 @@ export default function TutorialesPage() {
             <div style={{ marginTop: 24, borderRadius: 12, overflow: "hidden", border: "1px solid #E5E7EB", backgroundColor: "#000" }}>
               <video 
                 controls 
+                playsInline
+                preload="metadata"
                 style={{ width: "100%", display: "block" }} 
-                poster="/techxlighmode.png"
               >
                 <source src="/videos/anuncio2.mp4" type="video/mp4" />
                 Tu navegador no soporta el formato de video.
