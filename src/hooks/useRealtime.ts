@@ -4,6 +4,12 @@ import { createClient } from "@/lib/supabase/client";
 
 import { toast } from "sonner";
 
+type RealtimeRow = {
+  id?: string;
+  created_by?: string | null;
+  status?: string;
+};
+
 /**
  * useRealtimeTickets
  * Suscribe a cambios en la tabla `tickets` vía Supabase Realtime.
@@ -35,13 +41,13 @@ export function useRealtimeTickets(orgId: string | undefined, userId: string | n
           qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
 
           // Show foreground notification if made by another user
-          const newRow = payload.new as any;
+          const newRow = payload.new as RealtimeRow;
           if (newRow && (!newRow.created_by || newRow.created_by !== userId)) {
             if (payload.eventType === "INSERT") {
               toast.info(`Nuevo ticket recibido`, { description: `Estado: ${newRow.status}` });
             } else if (payload.eventType === "UPDATE") {
               // Ensure we don't spam toasts on every update unless status or amount changed
-              const oldRow = payload.old as any;
+              const oldRow = payload.old as RealtimeRow;
               if (oldRow && oldRow.status !== newRow.status) {
                 toast.info(`Ticket actualizado`, { description: `Nuevo estado: ${newRow.status}` });
               }
@@ -49,7 +55,11 @@ export function useRealtimeTickets(orgId: string | undefined, userId: string | n
           }
         }
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[Realtime tickets] subscription failed", { status, error });
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -86,12 +96,12 @@ export function useRealtimeOtrosServicios(orgId: string | undefined, userId: str
           }
           qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
 
-          const newRow = payload.new as any;
+          const newRow = payload.new as RealtimeRow;
           if (newRow && (!newRow.created_by || newRow.created_by !== userId)) {
             if (payload.eventType === "INSERT") {
               toast.info(`Nuevo servicio asignado`, { description: `ID: ${newRow.id.slice(0, 6)}` });
             } else if (payload.eventType === "UPDATE") {
-              const oldRow = payload.old as any;
+              const oldRow = payload.old as RealtimeRow;
               if (oldRow && oldRow.status !== newRow.status) {
                 toast.info(`Servicio actualizado`, { description: `Nuevo estado: ${newRow.status}` });
               }
@@ -99,7 +109,11 @@ export function useRealtimeOtrosServicios(orgId: string | undefined, userId: str
           }
         }
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[Realtime servicios] subscription failed", { status, error });
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -137,7 +151,11 @@ export function useRealtimeSales(orgId: string | undefined) {
           qc.invalidateQueries({ queryKey: ["ingresos-chart"] });
         }
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[Realtime ventas] subscription failed", { status, error });
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -174,7 +192,11 @@ export function useRealtimeCollectionTasks(orgId: string | undefined) {
           qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
         }
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[Realtime cobros] subscription failed", { status, error });
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -209,7 +231,11 @@ export function useRealtimeInventory(orgId: string | undefined) {
           qc.invalidateQueries({ queryKey: ["low-stock-count"] });
         }
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[Realtime inventario] subscription failed", { status, error });
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

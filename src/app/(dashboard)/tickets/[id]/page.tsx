@@ -552,7 +552,7 @@ export default function TicketDetailPage() {
                   </Badge>
                   {lockCode && lockType === "patron" ? (
                     <div className="mt-1.5">
-                      <PatternLock value={lockCode} size={80} />
+                      <PatternLock value={lockCode} size={140} />
                     </div>
                   ) : lockCode ? (
                     <span className="font-mono text-xs text-muted-foreground">

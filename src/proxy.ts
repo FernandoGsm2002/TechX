@@ -143,7 +143,7 @@ export async function proxy(request: NextRequest) {
   // ── 7. Rutas exclusivas para admin+ ───────────────────────
   const adminOnlyPaths = [
     "/finanzas/ingresos",
-    "/finanzas/reportes",
+    "/reportes",
     "/configuracion",
   ];
   if (adminOnlyPaths.some((p) => pathname.startsWith(p))) {

@@ -169,7 +169,7 @@ const NAV_GROUPS: NavGroup[] = [
     superadminOnly: true,
     items: [
       { title: "Superadmin",     href: "/superadmin",      icon: faShieldHalved,  superadminOnly: true },
-      { title: "Organizaciones", href: "/superadmin/orgs", icon: faBuilding,      superadminOnly: true },
+      { title: "Organizaciones", href: "/superadmin",      icon: faBuilding,      superadminOnly: true },
     ],
   },
 

@@ -1,5 +1,6 @@
 import webPush from "web-push";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -30,6 +31,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing organizationId" }, { status: 400 });
     }
 
+    // The caller can only notify people in their own organization.
+    const { data: callerProfile } = await supabase
+      .from("profiles")
+      .select("organization_id, role")
+      .eq("id", user.id)
+      .single();
+    if (!callerProfile || callerProfile.organization_id !== organizationId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const serviceSupabase = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } }
+    );
+
     // 1. Determine target users — specific user OR all admins in org
     let targetUserIds: string[];
     if (targetUserId) {
@@ -37,7 +54,7 @@ export async function POST(req: Request) {
       targetUserIds = [targetUserId];
     } else {
       // Default: broadcast to all admins in the org
-      const { data: profiles } = await supabase
+      const { data: profiles } = await serviceSupabase
         .from("profiles")
         .select("id")
         .eq("organization_id", organizationId)
@@ -45,16 +62,22 @@ export async function POST(req: Request) {
       targetUserIds = (profiles ?? []).map((p) => p.id);
     }
 
-    // Kept for compat with original return
-    const profiles = targetUserId ? [{ id: targetUserId }] : null;
+    if (targetUserId) {
+      const { data: target } = await serviceSupabase
+        .from("profiles")
+        .select("id")
+        .eq("id", targetUserId)
+        .eq("organization_id", organizationId)
+        .maybeSingle();
+      if (!target) return NextResponse.json({ error: "Usuario destino inválido" }, { status: 400 });
+    }
 
     if (targetUserIds.length === 0) {
       return NextResponse.json({ success: true, count: 0, reason: "No target users found." });
     }
-    void profiles; // unused after refactor above
 
     // 2. Fetch their push subscriptions
-    const { data: subs, error: subsError } = await supabase
+    const { data: subs, error: subsError } = await serviceSupabase
       .from("push_subscriptions")
       .select("*")
       .in("user_id", targetUserIds);
@@ -86,10 +109,13 @@ export async function POST(req: Request) {
       try {
         await webPush.sendNotification(pushSubscription, payload);
         sentCount++;
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Remove expired subscriptions
-        if (err.statusCode === 410 || err.statusCode === 404) {
-          await supabase.from("push_subscriptions").delete().eq("id", sub.id);
+        const statusCode = typeof err === "object" && err !== null && "statusCode" in err
+          ? (err as { statusCode?: number }).statusCode
+          : undefined;
+        if (statusCode === 410 || statusCode === 404) {
+          await serviceSupabase.from("push_subscriptions").delete().eq("id", sub.id);
         } else {
           console.error("WebPush Error:", err);
         }
@@ -99,8 +125,9 @@ export async function POST(req: Request) {
     await Promise.allSettled(sendPromises);
 
     return NextResponse.json({ success: true, count: sentCount });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Send Push Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Error interno";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

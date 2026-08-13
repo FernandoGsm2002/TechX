@@ -51,6 +51,10 @@ logs/
 # ─── Vercel    
 .vercel
 
+# ─── Supabase migrations ───
+# Database schema changes are applied directly through the managed project.
+supabase/migrations/
+
 # ─── TypeScript    
 *.tsbuildinfo
 next-env.d.ts
@@ -60,4 +64,3 @@ next-env.d.ts
 .cache/
 errors.txt
 *.txt.bak
-

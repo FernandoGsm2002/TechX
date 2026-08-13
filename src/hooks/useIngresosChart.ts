@@ -93,11 +93,11 @@ export function useIngresosChart(period: ChartPeriod = "month", technicianId?: s
 
       let serviciosQ = supabase
         .from("otros_servicios")
-        .select("delivered_at, price")
-        .eq("status", "entregado")
-        .eq("paid", true)
-        .gte("delivered_at", start.toISOString())
-        .lte("delivered_at", end.toISOString());
+        .select("paid_at, price")
+        .eq("payment_status", "pagado")
+        .not("paid_at", "is", null)
+        .gte("paid_at", start.toISOString())
+        .lte("paid_at", end.toISOString());
 
       // Filter by technician if provided
       if (technicianId) {
@@ -107,6 +107,10 @@ export function useIngresosChart(period: ChartPeriod = "month", technicianId?: s
       }
 
       const [ticketsRes, salesRes, serviciosRes] = await Promise.all([ticketsQ, salesQ, serviciosQ]);
+
+      if (ticketsRes.error)   throw ticketsRes.error;
+      if (salesRes.error)     throw salesRes.error;
+      if (serviciosRes.error) throw serviciosRes.error;
 
       // ── Aggregate into map ────────────────────────────────────────────────────
       function getKey(isoTimestamp: string): string | null {
@@ -138,8 +142,8 @@ export function useIngresosChart(period: ChartPeriod = "month", technicianId?: s
         }
       }
 
-      for (const s of (serviciosRes.data ?? []) as { delivered_at: string; price: number | null }[]) {
-        const key = getKey(s.delivered_at);
+      for (const s of (serviciosRes.data ?? []) as { paid_at: string; price: number | null }[]) {
+        const key = getKey(s.paid_at);
         if (key && map[key]) {
           map[key].servicios += Number(s.price ?? 0);
           map[key].total     += Number(s.price ?? 0);

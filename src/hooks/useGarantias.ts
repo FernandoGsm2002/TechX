@@ -315,16 +315,8 @@ export function useClaimWarranty() {
       if (tErr) throw tErr;
 
       // 3. Incrementar claim_count en la garantia
-      const { error: gErr } = await db()
-        .from("guarantees")
-        .update({ claim_count: db().rpc("increment_claim_count_placeholder") })
-        .eq("id", p.guaranteeId);
-
-      // Fallback manual si rpc no existe
-      if (gErr) {
-        const { data: g } = await db().from("guarantees").select("claim_count").eq("id", p.guaranteeId).single();
-        await db().from("guarantees").update({ claim_count: (g?.claim_count ?? 0) + 1 }).eq("id", p.guaranteeId);
-      }
+      const { data: g } = await db().from("guarantees").select("claim_count").eq("id", p.guaranteeId).single();
+      await db().from("guarantees").update({ claim_count: (g?.claim_count ?? 0) + 1 }).eq("id", p.guaranteeId);
 
       return newTicket;
     },

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createClient } from "@/lib/supabase/server";
 
 const apiKey = process.env.DEEPSEEK_API_KEY || "";
 const openai = apiKey ? new OpenAI({
@@ -9,6 +10,10 @@ const openai = apiKey ? new OpenAI({
 
 export async function POST(req: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
     const { text, field } = await req.json();
 
     if (!text) {
@@ -48,8 +53,8 @@ NO agregues comillas, saludos ni texto adicional. Solo devuelve el resumen corre
     const fixedText = completion.choices[0].message.content?.trim() || text;
 
     return NextResponse.json({ text: fixedText });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DeepSeek Fix Text Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createClient } from "@/lib/supabase/server";
 
-// Inicializamos el cliente de OpenAI configurado para DeepSeek
-// Si no hay API KEY, no inicializamos para no romper, manejaremos el fallo debajo.
 const apiKey = process.env.DEEPSEEK_API_KEY || "";
 const openai = apiKey ? new OpenAI({
   baseURL: "https://api.deepseek.com",
@@ -11,6 +10,10 @@ const openai = apiKey ? new OpenAI({
 
 export async function POST(req: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
     const { issue, device } = await req.json();
 
     // Si NO hay API Key configurada, utilizamos el simulador (mock) como respaldo
@@ -63,8 +66,8 @@ Instrucciones:
     const suggestion = completion.choices[0].message.content;
 
     return NextResponse.json({ suggestion });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DeepSeek API Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }

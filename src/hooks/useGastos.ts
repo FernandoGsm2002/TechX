@@ -159,12 +159,13 @@ export function useFinanzasStats(dateRange?: DateRange) {
       }
 
       // ── 1. Ticket income: ONLY fully paid tickets this month (by paid_at) ──
-      const { data: paidTickets } = await db
+      const { data: paidTickets, error: ticketsErr } = await db
         .from("tickets")
         .select("final_amount, quote_amount, parts_amount")
         .eq("payment_status", "pagado")
         .gte("paid_at", startOfMonth)
         .lt("paid_at",  startOfNextMonth);
+      if (ticketsErr) throw ticketsErr;
 
       const ticketIncome = ((paidTickets ?? []) as {
         final_amount: number | null;
@@ -175,26 +176,28 @@ export function useFinanzasStats(dateRange?: DateRange) {
       }, 0);
 
       // ── 2. POS income: ONLY paid sales this month (by paid_at) ──
-      const { data: posData } = await db
+      const { data: posData, error: posErr } = await db
         .from("sales")
         .select("total_amount")
         .eq("payment_status", "pagado")
         .is("voided_at", null)
         .gte("paid_at", startOfMonth)
         .lt("paid_at",  startOfNextMonth);
+      if (posErr) throw posErr;
 
       const posIncome = ((posData ?? []) as { total_amount: number }[]).reduce(
         (sum, s) => sum + Number(s.total_amount), 0
       );
 
-      // ── 3. Otros Servicios pagados este mes ──
-      const { data: serviciosData } = await db
+      // ── 3. Otros Servicios pagados este mes (por paid_at, igual que tickets y POS) ──
+      const { data: serviciosData, error: serviciosErr } = await db
         .from("otros_servicios")
         .select("price")
-        .eq("status", "entregado")
-        .eq("paid", true)
-        .gte("delivered_at", startOfMonth)
-        .lt("delivered_at",  startOfNextMonth);
+        .eq("payment_status", "pagado")
+        .not("paid_at", "is", null)
+        .gte("paid_at", startOfMonth)
+        .lt("paid_at",  startOfNextMonth);
+      if (serviciosErr) throw serviciosErr;
 
       const serviciosIncome = ((serviciosData ?? []) as { price: number }[]).reduce(
         (sum, s) => sum + Number(s.price ?? 0), 0
@@ -202,19 +205,24 @@ export function useFinanzasStats(dateRange?: DateRange) {
 
       const totalIngresos = ticketIncome + posIncome + serviciosIncome;
 
-      // ── 3. Expenses this month ──
-      const { data: expenses } = await supabase
+      // ── 4. Expenses this month ──
+      const { data: expenses, error: expensesErr } = await supabase
         .from("expenses")
         .select("amount")
         .gte("expense_date", startOfMonth.slice(0, 10))
         .lt("expense_date",  startOfNextMonth.slice(0, 10));
+      if (expensesErr) throw expensesErr;
 
       const totalGastos = ((expenses ?? []) as { amount: number }[]).reduce(
         (sum, e) => sum + Number(e.amount), 0
       );
 
-      // ── 4. Por Cobrar: fiados entregados (ya se fueron pero no pagaron) ──
-      const [{ data: fiadoTickets }, { data: fiadoSales }, { data: fiadoServicios }] = await Promise.all([
+      // ── 5. Por Cobrar: fiados entregados (ya se fueron pero no pagaron) ──
+      const [
+        { data: fiadoTickets, error: ftErr },
+        { data: fiadoSales,   error: fsErr },
+        { data: fiadoServicios, error: fsvErr },
+      ] = await Promise.all([
         db.from("tickets")
           .select("final_amount, quote_amount, parts_amount")
           .eq("payment_status", "fiado")
@@ -229,6 +237,10 @@ export function useFinanzasStats(dateRange?: DateRange) {
           .eq("payment_status", "fiado")
           .not("customer_id", "is", null),
       ]);
+
+      if (ftErr) throw ftErr;
+      if (fsErr) throw fsErr;
+      if (fsvErr) throw fsvErr;
 
       const porCobrar =
         ((fiadoTickets ?? []) as { final_amount: number | null; quote_amount: number | null; parts_amount: number }[])

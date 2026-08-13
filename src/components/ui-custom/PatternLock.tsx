@@ -195,11 +195,11 @@ export function PatternLock({ value, onChange, size }: PatternLockProps) {
               {isFirst && (
                 <div className="w-[38%] h-[38%] rounded-full bg-white/90" />
               )}
-              {/* Order number — interactive non-first */}
-              {!readOnly && inSeq && !isFirst && (
+              {/* Order number — show in both interactive and read-only modes */}
+              {inSeq && !isFirst && (
                 <span
                   className="text-primary-foreground font-black leading-none select-none"
-                  style={{ fontSize: dotR * 0.85 }}
+                  style={{ fontSize: Math.max(dotR * 0.85, 7) }}
                 >
                   {order + 1}
                 </span>

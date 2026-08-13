@@ -64,6 +64,8 @@ export async function POST(req: Request) {
         .update({ ...paymentUpdate, paid: true })
         .eq("id", task.fiado_id);
       if (error) throw error;
+    } else {
+      throw new Error(`fiado_source desconocido: ${task.fiado_source}`);
     }
 
     // 6. Mark the collection task as completed

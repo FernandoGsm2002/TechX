@@ -34,7 +34,7 @@ export function useFiados() {
 
       // 1. Unpaid Tickets
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: ticketsData } = await (supabase as any)
+      const { data: ticketsData, error: ticketsErr } = await (supabase as any)
         .from("tickets")
         .select(`
           id, final_amount, quote_amount, parts_amount, created_at, device_details, customer_id,
@@ -42,6 +42,7 @@ export function useFiados() {
         `)
         .eq("payment_status", "fiado")
         .eq("status", "entregado");
+      if (ticketsErr) throw ticketsErr;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ticketFiados: FiadoRow[] = (ticketsData ?? []).map((t: any) => ({
@@ -57,13 +58,14 @@ export function useFiados() {
 
       // 2. Unpaid POS Sales
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: posData } = await (supabase as any)
+      const { data: posData, error: posErr } = await (supabase as any)
         .from("sales")
         .select(`
           id, total_amount, created_at, customer_id, customer_name,
           sale_items ( quantity, inventory ( name, brand ) )
         `)
         .eq("payment_status", "fiado");
+      if (posErr) throw posErr;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const posFiados: FiadoRow[] = (posData ?? []).map((s: any) => {
@@ -86,7 +88,7 @@ export function useFiados() {
 
       // 3. Otros Servicios sin cobrar
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: serviciosData } = await (supabase as any)
+      const { data: serviciosData, error: serviciosErr } = await (supabase as any)
         .from("otros_servicios")
         .select(`
           id, price, created_at, customer_id, tags,
@@ -95,6 +97,7 @@ export function useFiados() {
         .eq("status", "entregado")
         .eq("payment_status", "fiado")
         .not("customer_id", "is", null);
+      if (serviciosErr) throw serviciosErr;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const servicioFiados: FiadoRow[] = (serviciosData ?? []).map((s: any) => ({
@@ -125,7 +128,7 @@ export function useFiadoHistory(limit = 30) {
 
       // 1. Tickets cobrados desde fiado (paid_by no nulo = cobro registrado manualmente)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: ticketsData } = await (supabase as any)
+      const { data: ticketsData, error: ticketsErr } = await (supabase as any)
         .from("tickets")
         .select(`
           id, final_amount, quote_amount, parts_amount, paid_at, payment_method, customer_id, device_details,
@@ -136,6 +139,7 @@ export function useFiadoHistory(limit = 30) {
         .not("paid_by", "is", null)
         .order("paid_at", { ascending: false })
         .limit(limit);
+      if (ticketsErr) throw ticketsErr;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ticketRows: FiadoPagadoRow[] = (ticketsData ?? []).map((t: any) => ({
@@ -152,7 +156,7 @@ export function useFiadoHistory(limit = 30) {
 
       // 2. Ventas POS cobradas desde fiado
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: posData } = await (supabase as any)
+      const { data: posData, error: posErr } = await (supabase as any)
         .from("sales")
         .select(`
           id, total_amount, paid_at, payment_method, customer_id, customer_name,
@@ -162,6 +166,7 @@ export function useFiadoHistory(limit = 30) {
         .not("paid_by", "is", null)
         .order("paid_at", { ascending: false })
         .limit(limit);
+      if (posErr) throw posErr;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const posRows: FiadoPagadoRow[] = (posData ?? []).map((s: any) => ({
@@ -178,7 +183,7 @@ export function useFiadoHistory(limit = 30) {
 
       // 3. Otros servicios cobrados desde fiado
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: serviciosData } = await (supabase as any)
+      const { data: serviciosData, error: serviciosErr } = await (supabase as any)
         .from("otros_servicios")
         .select(`
           id, price, paid_at, payment_method, customer_id, tags,
@@ -189,6 +194,7 @@ export function useFiadoHistory(limit = 30) {
         .not("paid_by", "is", null)
         .order("paid_at", { ascending: false })
         .limit(limit);
+      if (serviciosErr) throw serviciosErr;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const servicioRows: FiadoPagadoRow[] = (serviciosData ?? []).map((s: any) => ({

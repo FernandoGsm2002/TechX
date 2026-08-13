@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createClient } from "@/lib/supabase/server";
 
 const apiKey = process.env.DEEPSEEK_API_KEY || "";
 const openai = apiKey ? new OpenAI({
@@ -9,6 +10,10 @@ const openai = apiKey ? new OpenAI({
 
 export async function POST(req: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
     const { prompt } = await req.json();
 
     if (!prompt) {
@@ -61,8 +66,8 @@ Solo responde con el objeto JSON, sin ningún formato markdown extra, ni texto a
     }
 
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DeepSeek Autocomplete Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }

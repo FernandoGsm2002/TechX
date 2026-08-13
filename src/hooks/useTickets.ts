@@ -308,7 +308,7 @@ export function useUpdateTicket(ticketId: string) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tickets"] });
-      qc.invalidateQueries({ queryKey: ["ticket", ticketId] });
+      qc.invalidateQueries({ queryKey: ["tickets", ticketId] });
       toast.success("Ticket actualizado");
     },
     onError: (err: Error) => toast.error(err.message),
