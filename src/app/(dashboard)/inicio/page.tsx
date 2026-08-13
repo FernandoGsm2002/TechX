@@ -7,7 +7,7 @@ import {
   faTriangleExclamation, faClock, faCircleCheck, faArrowRight,
   faStore, faBagShopping, faTrophy, faWrench,
   faBolt, faBoxesStacked, faArrowTrendDown,
-  faFileInvoiceDollar, faCashRegister, faGauge,
+  faFileInvoiceDollar, faCashRegister, faGauge, faLockOpen,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -104,7 +104,7 @@ function SectionCard({
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const { org, role, userId, formatCurrency } = useOrganization();
+  const { org, role, userId, formatCurrency, enableOtrosServicios } = useOrganization();
   const { data: ticketsResponse, isLoading: loadingTickets } = useTickets(undefined, { role, userId, page: 0, pageSize: 5 });
   const { data: ticketStats, isLoading: loadingTicketStats } = useTicketsStats(org?.id, role, userId);
   const tickets = ticketsResponse?.data ?? [];
@@ -180,6 +180,32 @@ export default function DashboardPage() {
           {org?.name} · <ClientDate />
         </p>
       </div>
+
+      {/* ── Punto de partida operativo ── */}
+      <section className="rounded-2xl border border-primary/20 bg-card p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="max-w-xl">
+            <h2 className="text-base font-semibold">¿Qué vas a registrar?</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Inicia la atención sin buscar entre módulos. Los datos del equipo se registran en el mismo flujo de recepción.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button asChild size="lg" className="min-h-11 gap-2 shadow-sm">
+              <Link href="/tickets?create=1">
+                <FaIcon icon={faTicket} size={15} /> Recibir reparación
+              </Link>
+            </Button>
+            {enableOtrosServicios && (
+              <Button asChild size="lg" variant="outline" className="min-h-11 gap-2">
+                <Link href="/otros-servicios?create=1">
+                  <FaIcon icon={faLockOpen} size={15} /> Nuevo desbloqueo
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
+      </section>
 
       {/* ── Alertas ── */}
       <div className="space-y-2">
@@ -545,7 +571,7 @@ export default function DashboardPage() {
         <SectionCard title="Acciones Rápidas" icon={faBolt} iconClass="text-primary">
           <div className="grid grid-cols-2 gap-2 pt-0.5">
             {[
-              { label: "Nuevo Ticket",  href: "/tickets/new",        icon: faTicket,            text: "text-blue-400",   bg: "bg-blue-500/10",    border: "border-blue-500/20"    },
+              { label: "Recibir reparación", href: "/tickets?create=1", icon: faTicket,          text: "text-blue-400",   bg: "bg-blue-500/10",    border: "border-blue-500/20"    },
               { label: "Venta POS",     href: "/pos",                icon: faCashRegister,      text: "text-emerald-400",bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
               { label: "Nuevo Cliente", href: "/clientes",           icon: faUsers,             text: "text-purple-400", bg: "bg-purple-500/10",  border: "border-purple-500/20"  },
               ...(isAdmin ? [

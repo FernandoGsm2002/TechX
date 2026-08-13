@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   faLockOpen, faPlus, faTag, faXmark, faMobileScreen, faLock,
@@ -890,6 +890,7 @@ export default function OtrosServiciosPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formOpen, setFormOpen] = useState(false);
+  const [openedFromQuickAction, setOpenedFromQuickAction] = useState(false);
   const [editing, setEditing] = useState<OtroServicioRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<OtroServicioRow | null>(null);
   const [statusChangeTarget, setStatusChangeTarget] = useState<{
@@ -939,7 +940,18 @@ export default function OtrosServiciosPage() {
 
   const openCreate = () => { setEditing(null); setFormOpen(true); };
   const openEdit   = (s: OtroServicioRow) => { setEditing(s); setFormOpen(true); };
-  const closeForm  = () => { setFormOpen(false); setEditing(null); };
+  const closeForm  = () => {
+    setFormOpen(false);
+    setEditing(null);
+    if (openedFromQuickAction) router.replace("/otros-servicios");
+  };
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("create") === "1") {
+      setOpenedFromQuickAction(true);
+      openCreate();
+    }
+  }, []);
 
   // Count per status for tab badges
   const tabCounts: Record<string, number> = { all: servicios.length };
@@ -1200,7 +1212,7 @@ export default function OtrosServiciosPage() {
       {/* Formulario crear/editar */}
       <ServiceForm
         open={formOpen}
-        onOpenChange={setFormOpen}
+        onOpenChange={(open) => { if (open) setFormOpen(true); else closeForm(); }}
         editing={editing}
         onClose={closeForm}
       />

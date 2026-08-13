@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -92,6 +92,21 @@ export default function TicketsPage() {
   
   const { data: clientes = [] } = useClientes();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [openedFromQuickAction, setOpenedFromQuickAction] = useState(false);
+
+  // Permite entrar directamente desde las acciones rápidas sin duplicar el flujo
+  // de recepción en el dashboard.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("create") === "1") {
+      setOpenedFromQuickAction(true);
+      setDialogOpen(true);
+    }
+  }, []);
+
+  const handleDialogChange = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open && openedFromQuickAction) router.replace("/tickets");
+  };
 
   // ── Table columns ─────────────────────────────────────────────────────────
   const columns: DataColumn<TicketWithRelations>[] = [
@@ -395,7 +410,7 @@ export default function TicketsPage() {
       />
 
       {/* ── Create Dialog ──────────────────────────────────────────────────── */}
-      <CreateTicketModal open={dialogOpen} onOpenChange={setDialogOpen} />
+      <CreateTicketModal open={dialogOpen} onOpenChange={handleDialogChange} />
     </div>
   );
 }
