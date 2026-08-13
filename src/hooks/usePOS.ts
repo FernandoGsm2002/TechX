@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { notifyAdmins } from "@/lib/notifyAdmins";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const supabase = createClient() as any;
@@ -84,13 +85,27 @@ export function useCreateSale() {
 
       return { id: (data as { sale_id: string }).sale_id } as SaleRow;
     },
-    onSuccess: () => {
+    onSuccess: (_sale, payload) => {
       qc.invalidateQueries({ queryKey: ["inventario"] });
       qc.invalidateQueries({ queryKey: ["sales"] });
       qc.invalidateQueries({ queryKey: ["finanzas-stats"] });
       qc.invalidateQueries({ queryKey: ["low-stock"] });
       qc.invalidateQueries({ queryKey: ["low-stock-notif"] });
       qc.invalidateQueries({ queryKey: ["inventory_movements"] });
+
+      // La venta ya fue confirmada por el RPC. El Push es secundario: no debe
+      // impedir ni revertir la venta si el navegador/proveedor está sin conexión.
+      const itemCount = payload.items.reduce((total, item) => total + item.quantity, 0);
+      const customer = payload.customer_name?.trim();
+      void notifyAdmins(
+        payload.organization_id,
+        "Nueva venta registrada",
+        customer
+          ? `Venta para ${customer}: ${itemCount} producto${itemCount === 1 ? "" : "s"}.`
+          : `Se registró una venta de ${itemCount} producto${itemCount === 1 ? "" : "s"}.`,
+        "/pos"
+      );
+
       toast.success("Venta registrada correctamente");
     },
     onError: (err: Error) => toast.error(err.message),
