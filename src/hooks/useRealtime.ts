@@ -99,7 +99,7 @@ export function useRealtimeOtrosServicios(orgId: string | undefined, userId: str
           const newRow = payload.new as RealtimeRow;
           if (newRow && (!newRow.created_by || newRow.created_by !== userId)) {
             if (payload.eventType === "INSERT") {
-              toast.info(`Nuevo servicio asignado`, { description: `ID: ${newRow.id.slice(0, 6)}` });
+              toast.info("Nuevo servicio asignado", { description: `ID: ${(newRow.id ?? "nuevo").slice(0, 6)}` });
             } else if (payload.eventType === "UPDATE") {
               const oldRow = payload.old as RealtimeRow;
               if (oldRow && oldRow.status !== newRow.status) {
