@@ -62,8 +62,12 @@ export function usePushNotifications() {
 
       let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
-        toast.error("Esperando al Service Worker...");
-        registration = await navigator.serviceWorker.ready;
+        toast.info("Iniciando servicio de notificaciones…");
+        registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+          updateViaCache: "none",
+        });
+        await navigator.serviceWorker.ready;
       }
 
       if (!registration) {
