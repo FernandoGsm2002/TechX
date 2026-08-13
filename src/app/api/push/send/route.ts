@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   // Set VAPID keys on every request to ensure serverless environments read the right env vars
   if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
     webPush.setVapidDetails(
-      process.env.VAPID_SUBJECT ?? "mailto:soporte@techx.com",
+      process.env.VAPID_SUBJECT || "mailto:soporte@techx.com",
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
       process.env.VAPID_PRIVATE_KEY
     );

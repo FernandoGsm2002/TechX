@@ -39,7 +39,6 @@ export function usePushNotifications() {
       setIsSupported(true);
       checkSubscription();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const subscribeToPush = async () => {
@@ -72,6 +71,16 @@ export function usePushNotifications() {
         return;
       }
 
+      // A subscription created with an older VAPID key cannot be reused.
+      // Remove it so a key rotation or a previous failed setup does not block registration.
+      const existingSubscription = await registration.pushManager.getSubscription();
+      if (existingSubscription) {
+        const removed = await existingSubscription.unsubscribe();
+        if (!removed) {
+          throw new Error("No se pudo reemplazar la suscripción Push anterior.");
+        }
+      }
+
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
@@ -88,11 +97,13 @@ export function usePushNotifications() {
         setIsSubscribed(true);
         toast.success("Push activado correctamente en este dispositivo.");
       } else {
-        throw new Error("El servidor rechazó la suscripción (Código " + res.status + ")");
+        const data = await res.json().catch(() => null) as { error?: string } | null;
+        throw new Error(data?.error || "El servidor rechazó la suscripción (Código " + res.status + ")");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to subscribe to push notifications:", error);
-      toast.error(`Fallo al activar Push: ${error.message || 'Error desconocido'}`);
+      const message = error instanceof Error ? error.message : "Error desconocido";
+      toast.error(`Fallo al activar Push: ${message}`);
     }
   };
 
